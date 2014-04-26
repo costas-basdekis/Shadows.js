@@ -3,10 +3,28 @@
 <head>
 	<!-- Load the Paper.js library -->
 	<script type="text/javascript" src="js/lib/paper-full.js"></script>
-	<script type="text/javascript" src="js/demo.js"></script>
+
 	<script type="text/javascript" src="js/utils/python.js"></script>
+	<script type="text/javascript" src="js/shadows/CartesianPoint.js"></script>
+	<script type="text/javascript" src="js/shadows/CartesianLine.js"></script>
+
+	<script type="text/javascript" src="js/demo/demo.js"></script>
+	<script type="text/javascript" src="js/demo/create-walls.js"></script>
 </head>
 <body>
 	<canvas id="myCanvas" resize></canvas>
+
+	<script type="text/javascript">
+		var oldOnLoad = window.onload;
+
+		function onLoad() {
+			if (oldOnLoad) {
+				oldOnLoad();
+			}
+			ShadowsApp.init();
+		}
+
+		window.onload = onLoad;
+	</script>
 </body>
 </html>
