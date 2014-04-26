@@ -2,13 +2,14 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App = obj;
 
 	App.walls = [];
-	App.wallsPath;
+	App.paper = App.paper || {}
+	App.paper.wallsPath;
 
 	App.createWalls = function createWalls() {
 		this.addOuterBox();
 
-		this.wallsPath = new _.Path();
-		this.linesToPath(this.walls, this.wallsPath);
+		this.paper.wallsPath = new _.Path();
+		this.linesToPath(this.walls, this.paper.wallsPath);
 	};
 
 	App.addOuterBox = function addOuterBox () {
