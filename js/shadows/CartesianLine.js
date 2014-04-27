@@ -1,7 +1,7 @@
 var Shadows = (function defineCartesianLine(obj) {
 	var CartesianLine = obj.CartesianLine = CLASS('Shadows.CartesianLine', {
 		__init__: METHOD(DEF(
-			['self', {name:'start', default:None}, {name:'end', default:None}],
+			['self', {n: 'start', d: None}, {n: 'end', d: None}],
 			function __init__(self, start, end) {
 				self.__super__({name: '__init__'})();
 
@@ -31,7 +31,7 @@ var Shadows = (function defineCartesianLine(obj) {
 				return diff.length();
 			})),
 		minus: METHOD(DEF(
-			['self', 'point'],
+			['self', {n: 'point', is: [Shadows.CartesianPoint]}],
 			function (self, point) {
 				self.start.minus([point]);
 				self.end.minus([point]);

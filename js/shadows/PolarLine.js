@@ -1,12 +1,14 @@
 var Shadows = (function definePolarLine(obj) {
 	var PolarLine = obj.PolarLine = CLASS('Shadows.PolarLine', {
 		__init__: METHOD(DEF(
-			['self', {name:'start', default:None}, {name:'end', default:None}],
+			['self', 
+			 {n: 'start', dd: Shadows.PolarPoint, is: [Shadows.PolarPoint]},
+			 {n: 'end', dd: Shadows.PolarPoint}, is: [Shadows.PolarPoint]],
 			function __init__(self, start, end) {
 				self.__super__({name: '__init__'})();
 
-				self.start = start || Shadows.PolarPoint();
-				self.end = end || Shadows.PolarPoint();
+				self.start = start;
+				self.end = end;
 			})),
 		__copy__: METHOD(DEF(
 			['self'],
@@ -25,7 +27,7 @@ var Shadows = (function definePolarLine(obj) {
 				});
 			})),
 		fromCartesian: METHOD(DEF(
-			['self', 'other'],
+			['self', {n: 'other', is: ['Shadows.CartesianLine']}],
 			function (self, other) {
 				self.start.fromCartesian([other.start]);
 				self.end.fromCartesian([other.end]);

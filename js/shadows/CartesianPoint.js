@@ -1,7 +1,7 @@
 var Shadows = (function defineCartesianPoint(obj) {
 	var CartesianPoint = obj.CartesianPoint = CLASS('Shadows.CartesianPoint', {
 		__init__: METHOD(DEF(
-			['self', {name:'x', default:0}, {name:'y', default:0}],
+			['self', {n: 'x', d: 0}, {n: 'y', d: 0}],
 			function __init__(self, x, y) {
 				self.__super__({name: '__init__'})();
 
@@ -22,7 +22,7 @@ var Shadows = (function defineCartesianPoint(obj) {
 				self.y = y;
 			})),
 		equals: METHOD(DEF(
-			['self', 'other'],
+			['self', {n: 'other', is: ['Shadows.CartesianPoint']}],
 			function equals(self, other) {
 				return Shadows.Math.CIEq([self.x, other.x]) &&
 					   Shadows.Math.CIEq([self.y, other.y]);
@@ -33,7 +33,7 @@ var Shadows = (function defineCartesianPoint(obj) {
 				return Math.sqrt(self.x * self.x + self.y * self.y);
 			})),
 		minus: METHOD(DEF(
-			['self', 'other'],
+			['self', {n:'other', is: ['Shadows.CartesianPoint']}],
 			function minus(self, other) {
 				self.x -= other.x;
 				self.y -= other.y;

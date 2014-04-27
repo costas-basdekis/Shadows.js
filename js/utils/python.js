@@ -180,29 +180,73 @@ DEF = (function defineDEF() {
 		return e;
 	}
 
-	function collectArgumentDefinition(arg) {
-		var argDef = {
-			name: '',
-			default: null,
-			hasDefault: false,
-		};
+	function collectArgDefItem(defObj, arg, argDef, names) {
+		var hasDef = false, mainName = names[0];
 
-		if (arg.hasOwnProperty('name')) {
-			argDef.name = arg.name;
-		} else {
+		//At most one name should be defined
+		for (var i = 0, name ; name = names[i] ; i++) {
+			if (arg.hasOwnProperty(name)) {
+				if (hasDef) {
+					throw DE(defObj, "Only use one synomym for '%s'".interpolate(mainName));
+				}
+				argDef[mainName] = arg[name];
+				hasDef = true;
+			}
+		}
+
+		return hasDef;
+	}
+
+	function collectArgumentDefinition(defObj, arg) {
+		var argDef = {};
+
+		if (!collectArgDefItem(defObj, arg, argDef, ['name', 'n'])) {
 			argDef.name = arg;
+
+			//Allow shorthand for args and kwargs
+			if (arg == '*') {
+				argDef.args = true;
+			}
+			if (arg == '**') {
+				argDef.kwargs = true;
+			}
+
+			return argDef;
 		}
 
-		if (arg.hasOwnProperty('default')) {
+		if (collectArgDefItem(defObj, arg, argDef, ['default', 'd'])) {
 			argDef.hasDefault = true;
-			argDef.default = arg.default;
-		};
-
-		if (arg.hasOwnProperty('args')) {
-			argDef.args = bool(arg.args);
 		}
 
-		if (arg.hasOwnProperty('kwargs')) {
+		if (collectArgDefItem(defObj, arg, argDef, ['isinstance', 'is-a', 'is'])) {
+			var i = 0;
+		}
+
+		var hasDefault = collectArgDefItem(defObj, arg, argDef, ['default', 'd']);
+		var hasDynamicDefault = collectArgDefItem(defObj, arg, argDef, ['dynamicdefault', 'dd']);
+		if (hasDynamicDefault) {
+			if (!isFunction(argDef.dynamicdefault)) {
+				throw DE(defObj, "dynamicdefault must be function, not %s"
+					.interpolate(argDef.dynamicdefault));
+			}
+		}
+
+		if (hasDefault && hasDynamicDefault) {
+			throw DE(defObj, "Specify default XOR dynamicdefault");
+		}
+
+		if (hasDefault) {
+			argDef.hasDefault = true;
+		}
+		if (hasDynamicDefault) {
+			argDef.hasDynamicDefault = true;
+		}
+
+		if (collectArgDefItem(defObj, arg, argDef, ['args', '*'])) {
+			argDef.args = bool(argDef.args);
+		}
+
+		if (collectArgDefItem(defObj, arg, argDef, ['kwargs', '**'])) {
 			argDef.kwargs = bool(arg.kwargs);
 		}
 
@@ -221,6 +265,9 @@ DEF = (function defineDEF() {
 
 		if (argDef.hasDefault) {
 			defObj.argDefaults[argDef.name] = argDef.default;
+			defObj.usingDefaults = true;
+		} else if (argDef.hasDynamicDefault) {
+			defObj.argDynamicDefaults[argDef.name] = argDef.dynamicdefault;
 			defObj.usingDefaults = true;
 		} else {
 			if (defObj.usingDefaults) {
@@ -277,12 +324,14 @@ DEF = (function defineDEF() {
 		defObj.argNames = [];
 		defObj.argDict = {};
 		defObj.argDefaults = {};
+		defObj.argDynamicDefaults = {};
 		defObj.usingDefaults = false;
 		defObj.allowArgs = false;
 		defObj.allowKWargs = false;
 		for (var i = 0 ; i < defObj.argDefs.length ; i++) {
 			var arg = defObj.argDefs[i];
-			var argDef = collectArgumentDefinition(arg);
+			var argDef = collectArgumentDefinition(defObj, arg);
+			defObj.argDefs[i] = argDef;
 
 			handleArgumentDefinition(defObj, argDef);
 		}
@@ -384,16 +433,57 @@ DEF = (function defineDEF() {
 
 			if (!hasArg) {
 				var hasDefault = argObj.defObj.argDefaults.hasOwnProperty(argName);
-				if (!hasDefault) {
+				var hasDynamicDefault = argObj.defObj.argDynamicDefaults.hasOwnProperty(argName);
+				if (!hasDefault && !hasDynamicDefault) {
 					throw CE(argObj, 'Argument "%s" was not passed'.interpolate(argName));
 				}
 
-				argValue = argObj.defObj.argDefaults[argName];
+				if (hasDefault) {
+					argValue = argObj.defObj.argDefaults[argName];
+				} else {
+					var dd = argObj.defObj.argDynamicDefaults[argName];
+					argValue = dd();
+				}
 			} else {
 				argValue = argObj.passArgumentsDict[argName];
 			}
 
 			argObj.passArguments.push(argValue);
+		}
+	}
+
+	function validateArguments(argObj) {
+		for (var i = 0, argDef ; argDef = argObj.defObj.argDefs[i] ; i++) {
+			var arg = argObj.passArguments[i];
+			if (arg === null) {
+				continue;
+			}
+
+			if (argDef.isinstance) {
+				var isA = false;
+				for (var j = 0, cls ; cls = argDef.isinstance[j] ; j++) {
+					//Get class by name
+					if (CLASSES[cls]) {
+						cls = CLASSES[cls];
+					}
+
+					if (isinstance(arg, cls)) {
+						isA = true;
+						break;
+					}
+				}
+				if (!isA) {
+					var argType = typeof arg;
+					if (arg.__fullname__) {
+						argType = arg.__fullname__;
+					} else if (arg.__class__) {
+						argType = arg.__class__.__fullname__;
+					}
+					throw CE(argObj, "%s was of unacceptable type %s, not %s"
+						.interpolate(argDef.name, argType, 
+									 argDef.isinstance.join(', ')))
+				}
+			}
 		}
 	}
 
@@ -420,6 +510,7 @@ DEF = (function defineDEF() {
 		collectArgs(argObj);
 		collectKWargs(argObj);
 		makeArgumentsArray(argObj);
+		validateArguments(argObj);
 		callFunction(argObj);
 
 		return argObj.result;
@@ -501,6 +592,18 @@ KeyException = DEFEXCEPTION('KeyException');
 ClassException = DEFEXCEPTION('ClassException');
 
 object = null;
+CLASSES = {};
+function isinstance(obj, cls) {
+	var objCls = obj.__class__;
+	while (cls) {
+		if (objCls == cls || objCls == cls.__class_def__) {
+			return true;
+		}
+		cls = cls.__base__;
+	}
+
+	return false;
+}
 //Make a class Python style:
 //base: A base Python class - optional, implied object
 //name: The class's name
@@ -541,6 +644,13 @@ CLASS = (function defineCLASS() {
 			cls.__fullname__ = '%s.%s'.interpolate(cls.__namespace__, cls.__name__);
 		} else {
 			cls.__fullname__ = cls.__name__;
+		}
+
+		if (cls.__namespace__) {
+			if (CLASSES[cls.__fullname__]) {
+				throw ClassException('Class %s already defined'.interpolate(cls.__fullname__));
+			}
+			CLASSES[cls.__fullname__] = cls;
 		}
 	}
 
@@ -636,7 +746,7 @@ CLASS = (function defineCLASS() {
 
 		setBase(base, name, cls);
 
-		var __new__ = DEF([{args:True}, {kwargs:True}],
+		var __new__ = DEF(["*", "**"],
 			function __new__(args, kwargs){
 				var obj = createObject(cls);
 				obj.__init__(args, kwargs);
@@ -658,7 +768,7 @@ METHOD = (function defineMETHOD() {
 	function bind(func, self) {
 		var selfArgs = [self];
 
-		var bound = DEF([{args: True}, {kwargs: True}],
+		var bound = DEF(["*", "**"],
 			function bound(args, kwargs) {
 				var allArgs = selfArgs.concat(args);
 				var result = func(allArgs, kwargs)

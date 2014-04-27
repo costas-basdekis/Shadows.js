@@ -22,7 +22,7 @@ var Shadows = (function definePolarPoint(obj) {
 				self.distance = distance;
 			})),
 		equals: METHOD(DEF(
-			['self', 'other'],
+			['self', {n: 'other', is: ['Shadows.PolarPoint']}],
 			function equals(self, other) {
 				return Shadows.Math.CIEq([self.angle, other.angle]) &&
 					   Shadows.Math.CIEq([self.distance, other.distance]);
@@ -35,7 +35,7 @@ var Shadows = (function definePolarPoint(obj) {
 				return self;
 			})),
 		fromCartesian: METHOD(DEF(
-			['self', 'other'],
+			['self', {n: 'other', is:['Shadows.CartesianPoint']}],
 			function fromCartesian(self, other) {
 				self.angle = other.getAngle();
 				self.distance = other.length();
