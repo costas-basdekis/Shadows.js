@@ -1,5 +1,5 @@
-var Shadows = (function defineShadows(obj) {
-	var CartesianLine = obj.CartesianLine = CLASS('CartesianLine', {
+var Shadows = (function defineCartesianLine(obj) {
+	var CartesianLine = obj.CartesianLine = CLASS('Shadows.CartesianLine', {
 		__init__: METHOD(DEF(
 			['self', {name:'start', default:None}, {name:'end', default:None}],
 			function __init__(self, start, end) {
@@ -29,6 +29,22 @@ var Shadows = (function defineShadows(obj) {
 			function length(self) {
 				var diff = self.end.__copy__().minus([self.start]);
 				return diff.length();
+			})),
+		minus: METHOD(DEF(
+			['self', 'point'],
+			function (self, point) {
+				self.start.minus([point]);
+				self.end.minus([point]);
+
+				return self;
+			})),
+		toPolar: METHOD(DEF(
+			['self'],
+			function toPolar(self) {
+				var polar = Shadows.PolarLine();
+				polar.fromCartesian([self]);
+
+				return polar;
 			})),
 	});
 

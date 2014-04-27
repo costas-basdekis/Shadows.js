@@ -44,7 +44,7 @@ test("CartesianPoint", function() {
 	ok(p.x == 1 && p.y == 0, "set works");
 
 	ok(p.equals, ".equals");
-	p1 = p.__copy__();
+	var p1 = p.__copy__();
 	ok(p.equals([p1]), "Copy + equals");
 
 	ok(p.getAngle, ".getAngle");
@@ -87,7 +87,7 @@ test("PolarPoint", function() {
 	ok(p.angle == 1 && p.distance == 0, "set works");
 
 	ok(p.equals, ".equals");
-	p1 = p.__copy__();
+	var p1 = p.__copy__();
 	ok(p.equals([p1]), "Copy + equals");
 
 	var cp = CartesianPoint({x: 1, y: 0});
@@ -106,4 +106,36 @@ test("PolarPoint", function() {
 	equal(p.angle, -Math.PI / 4, "offsetAngle offsets");
 	p.offsetAngle([Math.PI / 8]);
 	equal(p.angle, -Math.PI * 3 / 8, "offsetAngle offsets");
+});
+
+
+test("CartesianLine", function() {
+	var CartesianPoint = Shadows.CartesianPoint;
+	var PolarPoint = Shadows.PolarPoint;
+	var CartesianLine = Shadows.CartesianLine;
+
+	ok(CartesianLine, "Exists");
+	ok(CartesianLine(), ".Create");
+
+	var l1 = CartesianLine();
+	ok(l1.start, "has start");
+	ok(l1.end, "has end");
+
+	ok(l1.length, "has length");
+	ok(l1.length() != null, "length works");
+	l1.start.set({x: 1, y: 1});
+	l1.end.set({x: 4, y: 5});
+	equal(l1.length(), 5, "Length is correct");
+
+	ok(l1.minus, ".minus");
+	var p1 = CartesianPoint();
+	ok(l1.minus([p1]) == l1, "minus wokrs");
+	l1.start.set({x: 1, y: 2});
+	l1.end.set({x: 3, y: 4});
+	p1.set({x: 1, y: 1});
+	l1.minus([p1]);
+	ok(l1.start.x == 0 &&
+	   l1.start.y == 1 &&
+	   l1.end.x == 2 &&
+	   l1.end.y == 3, "minus is correct");
 });
