@@ -1,10 +1,11 @@
 var Logger = CLASS('utils.Logger', {
 	__init__: METHOD(DEF(
-		['self', {n: 'tab', d: '    '}],
-		function __init__ (self, tab) {
+		['self', {n: 'tab', d: '    '}, {n:'muted', d: True}],
+		function __init__ (self, tab, muted) {
 			self.tab = tab;
 			self.tabcount = 0;
 			self.tabs = '';
+			self.muted = bool(muted);
 		})),
 	render: METHOD(DEF(
 		['self', 'format', 'args'],
@@ -14,9 +15,23 @@ var Logger = CLASS('utils.Logger', {
 
 			return str;
 		})),
+	mute: METHOD(DEF(
+		['self'],
+		function mute(self) {
+			self.muted = True;
+		})),
+	unmute: METHOD(DEF(
+		['self'],
+		function unmute(self) {
+			self.muted = False;
+		})),
 	log: METHOD(DEF(
 		['self', 'format', '*'],
 		function log(self, format, args) {
+			if (self.muted) {
+				return '';
+			}
+			
 			var str = self.render([format, args]);
 
 			console.log(str);
@@ -26,6 +41,10 @@ var Logger = CLASS('utils.Logger', {
 	warning: METHOD(DEF(
 		['self', 'format', '*'],
 		function warning(self, format, args) {
+			if (self.muted) {
+				return '';
+			}
+			
 			var str = self.render([format, args]);
 
 			console.warning(str);
@@ -35,6 +54,10 @@ var Logger = CLASS('utils.Logger', {
 	error: METHOD(DEF(
 		['self', 'format', '*'],
 		function error(self, format, args) {
+			if (self.muted) {
+				return '';
+			}
+			
 			var str = self.render([format, args]);
 
 			console.error(str);

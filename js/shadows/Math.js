@@ -59,6 +59,19 @@ var Shadows = (function defineMath(obj, jsMath) {
 			function CIGt(lhs, rhs) {
 				return !this.compareInfix([lhs, this.Compare.GreaterThan, rhs]);
 			}),
+		round: DEF(namespace,
+			['number', {n: 'digits', d: 0}],
+			function round(number, digits) {
+				digits = parseInt(digits);
+				if (isNaN(digits) || digits < 0) {
+					digits = 0;
+				}
+
+				var raised = jsMath.pow(10, digits);
+				var rounded = jsMath.round(number * raised) / raised;
+
+				return rounded;
+			}),
 	};
 
 	return obj;

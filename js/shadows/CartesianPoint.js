@@ -15,6 +15,21 @@ var Shadows = (function defineCartesianPoint(obj) {
 					y: self.y,
 				});
 			})),
+		copyFrom: METHOD(DEF(
+			['self', {n: 'other', is: ['Shadows.CartesianPoint']}],
+			function copyFrom(self, other) {
+				self.set({
+					x: other.x,
+					y: other.y,
+				});
+
+				return self;
+			})),
+		toString: METHOD(DEF(
+			['self'],
+			function toString(self) {
+				return '[%s,%s]'.interpolate(self.x, self.y);
+			})),
 		set: METHOD(DEF(
 			['self', 'x', 'y'],
 			function (self, x, y) {

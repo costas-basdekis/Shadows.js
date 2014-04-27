@@ -42,6 +42,15 @@ var Shadows = (function definePolarPoint(obj) {
 
 				return self;
 			})),
+		toString: METHOD(DEF(
+			['self'],
+			function toString(self) {
+				var distance = Shadows.Math.round([self.distance, 2]);
+				var angle = Shadows.Math.round([self.angle, 2]);
+				var str = '[%s @%s]'.interpolate(distance, angle);
+
+				return str;
+			})),
 	});
 
 	return obj;

@@ -24,6 +24,12 @@ var Shadows = (function defineCartesianLine(obj) {
 					end: self.end.__deepcopy__(),
 				});
 			})),
+		copyFrom: METHOD(DEF(
+			['self', {n: 'other', is:['Shadows.CartesianLine']}],
+			function copyFrom (self, other) {
+				self.start.copyFrom([other.start]);
+				self.end.copyFrom([other.end]);
+			})),
 		length: METHOD(DEF(
 			['self'],
 			function length(self) {
