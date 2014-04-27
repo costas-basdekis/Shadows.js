@@ -516,6 +516,19 @@ DEF = (function defineDEF() {
 		return argObj.result;
 	}
 
+	function handleException(argObj, e) {
+		if (e.__localexception__ == True) {
+			e.__localexception__ = False;
+			console.error(e.toString());
+			e.stack.push(argObj);
+		} else if (e.__localexception__ == False) {
+			console.error('in %s()'.interpolate(argObj.defObj.fullname));
+			e.stack.push(argObj);
+		} else {
+			console.error('in %s(): %s'.interpolate(argObj.defObj.fullname, e));
+		}
+	}
+
 	function decorate(defObj) {
 		var func = defObj.func;
 
@@ -538,16 +551,7 @@ DEF = (function defineDEF() {
 			try {
 				callDEF(argObj);
 			} catch (e) {
-				if (e.__localexception__ == True) {
-					e.__localexception__ = False;
-					console.error(e.toString());
-					e.stack.push(argObj);
-				} else if (e.__localexception__ == False) {
-					console.error('in %s()'.interpolate(argObj.defObj.fullname));
-					e.stack.push(argObj);
-				} else {
-					console.error('in %s(): %s'.interpolate(argObj.defObj.fullname, e));
-				}
+				handleException(argObj, e);
 				throw e;
 			}
 
@@ -676,6 +680,14 @@ CLASS = (function defineCLASS() {
 
 		if (method.hasOwnProperty('__bind__')) {
 			bound = method.__bind__(method, self);
+			//Name instance or class bound function
+			if (bound.__bound__ == 'instance') {
+				bound.__funcdef__.fullname = 'instance-bound of %s'.interpolate(
+					bound.__func__.__funcdef__.fullname);
+			} else if (bound.__bound__ == 'class') {
+				bound.__funcdef__.fullname = 'class-bound of %s'.interpolate(
+					bound.__func__.__funcdef__.fullname);
+			}
 		} else {
 			bound = method;
 		}
@@ -776,6 +788,7 @@ METHOD = (function defineMETHOD() {
 				return result;
 			});
 
+		bound.__bound__ = 'instance';
 		bound.__func__ = func;
 		bound.__funcname__ = func.__funcname__ || func.name;
 
@@ -805,6 +818,7 @@ CLASSMETHOD = (function defineCLASSMETHOD() {
 				return result;
 			});
 
+		bound.__bound__ = 'class';
 		bound.__func__ = func;
 		bound.__funcname__ = func.__funcname__ || func.name;
 
