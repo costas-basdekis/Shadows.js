@@ -54,6 +54,7 @@ function ExceptionBase(message, name) {
 
 	this.message = message;
 	this.name = name;
+	this.stack = [];
 }
 ExceptionBase.prototype.toString = function () {
 	return '%s: %s'.interpolate(this.name, this.message);
@@ -163,6 +164,22 @@ CallException = DEFEXCEPTION('CallException', PythonException);
 //});
 //f1([1, 2]) == f1([1], {b: 2}) == f1({a:1, b:2})
 DEF = (function defineDEF() {
+	function DE(defObj, message) {
+		var msg = 'def %s: %s'.interpolate(defObj.fullname, message);
+		var e = DefException(msg);
+
+		return e;
+	}
+
+	function CE(argObj, message) {
+		var msg = '%s(): %s'.interpolate(argObj.defObj.fullname, message);
+		var e = CallException(msg);
+		//Use this so that the first try-catch doesn't show an extra message
+		e.__localexception__ = True;
+
+		return e;
+	}
+
 	function collectArgumentDefinition(arg) {
 		var argDef = {
 			name: '',
@@ -194,11 +211,11 @@ DEF = (function defineDEF() {
 
 	function storeArgumentDefinition(defObj, argDef) {
 		if (isObject(argDef.name)) {
-			throw DefException('You must provide a name for the argument');
+			throw DE(defObj, 'You must provide a name for the argument');
 		}
 
 		if (defObj.argDict.hasOwnProperty(argDef.name)) {
-			throw DefException('Argument "%s" was defined multiple times'.interpolate(argDef.Name));
+			throw DE(defObj, 'Argument "%s" was defined multiple times'.interpolate(argDef.Name));
 		}
 		defObj.argDict[argDef.name] = true;
 
@@ -207,7 +224,7 @@ DEF = (function defineDEF() {
 			defObj.usingDefaults = true;
 		} else {
 			if (defObj.usingDefaults) {
-				throw DefException('Only the last arguments can have defaults');
+				throw DE(defObj, 'Only the last arguments can have defaults');
 			}
 		}
 
@@ -216,35 +233,35 @@ DEF = (function defineDEF() {
 
 	function handleArgumentDefinition(defObj, argDef) {
 		if (argDef.args && argDef.kwargs) {
-			throw DefException('Same argument can\'t be *args and **kwargs');
+			throw DE(defObj, 'Same argument can\'t be *args and **kwargs');
 		}
 
 		if (argDef.args) {
 			if (defObj.allowArgs) {
-				throw DefException('At most one argument can be *args');
+				throw DE(defObj, 'At most one argument can be *args');
 			}
 			if (defObj.allowKWargs) {
-				throw DefException('*args should be just before **kwargs');
+				throw DE(defObj, '*args should be just before **kwargs');
 			}
 			if (argDef.hasDefault) {
-				throw DefException('*args can\'t have a default value');
+				throw DE(defObj, '*args can\'t have a default value');
 			}
 
 			defObj.allowArgs = true;
 		} else if (argDef.kwargs) {
 			if (defObj.allowKWargs) {
-				throw DefException('At most one argument can be *kwargs');
+				throw DE(defObj, 'At most one argument can be *kwargs');
 			}
 			if (argDef.hasDefault) {
-				throw DefException('**kargs can\'t have a default value');
+				throw DE(defObj, '**kargs can\'t have a default value');
 			}
 
 			defObj.allowKWargs = true;
 		} else {
 			if (defObj.allowKWargs) {
-				throw DefException('Can\'t have arguments after **kwargs');
+				throw DE(defObj, 'Can\'t have arguments after **kwargs');
 			} else if (defObj.allowArgs) {
-				throw DefException('Can\'t have arguments after *args');
+				throw DE(defObj, 'Can\'t have arguments after *args');
 			}
 
 			storeArgumentDefinition(defObj, argDef);
@@ -253,7 +270,7 @@ DEF = (function defineDEF() {
 
 	function collectArgumentDefinitions(defObj) {
 		if (!isArray(defObj.argDefs)) {
-			throw DefException('Arguments were not passed');
+			throw DE(defObj, 'Arguments were not passed');
 		}
 
 		//Keep a set of defined argument names
@@ -274,14 +291,25 @@ DEF = (function defineDEF() {
 	function makeDEF(defObj) {
 		//Allow the definitions to be implied as empty
 		if (defObj.arguments.length == 1) {
-			defObj.argDefs = [];
 			defObj.func = defObj.arguments[0];
-		} else if (defObj.arguments.length != 2) {
-			throw DefException('More than definitions and function were passed');
+			defObj.namespace = '';
+			defObj.argDefs = [];
+		} else if (defObj.arguments.length == 2) {
+			defObj.func = defObj.arguments[1];
+			if (isArray(defObj.arguments[0])) {
+				defObj.argDefs = defObj.arguments[0];
+				defObj.namespace = '';
+			} else {
+				defObj.argDefs = [];
+				defObj.namespace = defObj.arguments[0];
+			}
+		} else if (defObj.arguments.length != 3) {
+			throw DE(defObj, 'More than definitions, namespace and function were passed');
 		}
 		if (!isFunction(defObj.func)) {
-			throw DefException('A function was not passed');
+			throw DE(defObj, 'A function was not passed');
 		}
+		defObj.funcname = defObj.func.__funcname__ || defObj.func.name;
 
 		collectArgumentDefinitions(defObj);
 	}
@@ -300,14 +328,14 @@ DEF = (function defineDEF() {
 				argObj.kwargs = argObj.arguments[0];;
 			}
 		} else if (argObj.arguments.length != 2) {
-			throw CallException('More than *args and **kwargs was passed');
+			throw CE(argObj, 'More than *args and **kwargs was passed');
 		}
 
 		if (!isArray(argObj.args)) {
-			throw CallException('*args was not an array');
+			throw CE(argObj, '*args was not an array');
 		}
 		if (!isObject(argObj.kwargs)) {
-			throw CallException('*kwargs was not an object');
+			throw CE(argObj, '*kwargs was not an object');
 		}
 	}
 
@@ -315,7 +343,7 @@ DEF = (function defineDEF() {
 		//Deal with args
 		if (argObj.args.length > argObj.defObj.argNames.length) {
 			if (!argObj.defObj.allowArgs) {
-				throw CallException('More *args than allowed where passed');
+				throw CE(argObj, 'More *args than allowed where passed');
 			}
 			argObj.passArgs = argObj.args.slice(argObj.defObj.argNames.length);
 			argObj.args = argObj.args.slice(0, argObj.defObj.argNames.length);
@@ -334,13 +362,13 @@ DEF = (function defineDEF() {
 
 			if (!argObj.defObj.argDict.hasOwnProperty(argName)) {
 				if (!argObj.defObj.allowKWargs) {
-					throw CallException('Unspecified argument named "%s" was passed'.interpolate(argName));
+					throw CE(argObj, 'Unspecified argument named "%s" was passed'.interpolate(argName));
 				}
 
 				argObj.passKWargs[argName] = argValue;
 			} else {
 				if (argObj.passArgumentsDict.hasOwnProperty(argName)) {
-					throw CallException('Argument "%s" was passed twice'.interpolate(argName));
+					throw CE(argObj, 'Argument "%s" was passed twice'.interpolate(argName));
 				}
 
 				argObj.passArgumentsDict[argName] = argValue;
@@ -357,7 +385,7 @@ DEF = (function defineDEF() {
 			if (!hasArg) {
 				var hasDefault = argObj.defObj.argDefaults.hasOwnProperty(argName);
 				if (!hasDefault) {
-					throw CallException('Argument "%s" was not passed'.interpolate(argName));
+					throw CE(argObj, 'Argument "%s" was not passed'.interpolate(argName));
 				}
 
 				argValue = argObj.defObj.argDefaults[argName];
@@ -416,7 +444,21 @@ DEF = (function defineDEF() {
 				passKWargs: {},
 			};
 
-			callDEF(argObj);
+			try {
+				callDEF(argObj);
+			} catch (e) {
+				if (e.__localexception__ == True) {
+					e.__localexception__ = False;
+					console.error(e.toString());
+					e.stack.push(argObj);
+				} else if (e.__localexception__ == False) {
+					console.error('in %s()'.interpolate(argObj.defObj.fullname));
+					e.stack.push(argObj);
+				} else {
+					console.error('in %s(): %s'.interpolate(argObj.defObj.fullname, e));
+				}
+				throw e;
+			}
 
 			return argObj.result;
 		}
@@ -426,18 +468,28 @@ DEF = (function defineDEF() {
 		return pythonFunction;
 	}
 
-	function DEF(argDefs, func) {
+	function putMetaData(defObj, decorated) {
+		defObj.fullname = defObj.func.name;
+		if (defObj.namespace) {
+			defObj.fullname = '%s.%s'.interpolate(
+				defObj.namespace, defObj.fullname);
+		}
+		decorated.__funcdef__ = defObj;
+		decorated.__funcname__ = defObj.fullname;
+	}
+
+	function DEF(namespace, argDefs, func) {
 		var defObj = {
 			argDefs: argDefs,
 			func: func,
+			namespace: namespace,
 			arguments: arguments,
 		};
 
 		makeDEF(defObj);
 
 		var decorated = decorate(defObj);
-
-		decorated.__func__ = defObj;
+		putMetaData(defObj, decorated);
 
 		return decorated;
 	}
@@ -455,7 +507,7 @@ object = null;
 //cls: The class, Python style
 //An instance has access to it's super methods with obj.__super__(cls, 'func_name')
 CLASS = (function defineCLASS() {
-	function setBase(base, cls) {
+	function setBase(base, name, cls) {
 		//Special case for the first class
 		if (object === null) {
 			base = None;
@@ -471,7 +523,42 @@ CLASS = (function defineCLASS() {
 
 		cls.__PYTHON_CLASS__ = true;
 		cls.__base__ = base && base.__class_def__;
-		cls.__name__ = name;
+
+		setName(cls, name);
+		setMethodsName(cls);
+	}
+
+	function setName(cls, name) {
+		var lIO = name.lastIndexOf('.');
+		if (lIO != -1) {
+			cls.__namespace__ = name.substr(0, lIO);
+			cls.__name__ = name.substr(lIO + 1);
+		} else {
+			cls.__name__ = name;
+		}
+		cls.__name__ = cls.__name__ || '<anonymous>';
+		if (cls.__namespace__) {
+			cls.__fullname__ = '%s.%s'.interpolate(cls.__namespace__, cls.__name__);
+		} else {
+			cls.__fullname__ = cls.__name__;
+		}
+	}
+
+	function setMethodsName(cls) {
+		if (!cls.__namespace__) {
+			return;
+		}
+
+		var clsKeys = getBaseKeys(cls);
+
+		for (var i = 0, key ; key = clsKeys[i] ; i++) {
+			var method = cls[key];
+			var defObj = method.__funcdef__;
+			if (defObj) {
+				defObj.namespace = cls.__fullname__;
+				defObj.fullname = '%s.%s'.interpolate(defObj.namespace, defObj.funcname);
+			}
+		}
 	}
 
 	function bind(method, self) {
@@ -547,7 +634,7 @@ CLASS = (function defineCLASS() {
 			throw ClassException('More than base, name and class were passed');
 		}
 
-		setBase(base, cls);
+		setBase(base, name, cls);
 
 		var __new__ = DEF([{args:True}, {kwargs:True}],
 			function __new__(args, kwargs){
@@ -580,6 +667,7 @@ METHOD = (function defineMETHOD() {
 			});
 
 		bound.__func__ = func;
+		bound.__funcname__ = func.__funcname__ || func.name;
 
 		return bound;
 	}
@@ -608,6 +696,7 @@ CLASSMETHOD = (function defineCLASSMETHOD() {
 			});
 
 		bound.__func__ = func;
+		bound.__funcname__ = func.__funcname__ || func.name;
 
 		return bound;
 	}
