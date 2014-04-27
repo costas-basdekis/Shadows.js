@@ -852,9 +852,11 @@ STATICMETHOD = (function defineSTATICMETHOD() {
 
 //The base class of all Python classes
 object = CLASS(None, 'object', {
+	__maxuuid__: 0,
 	__init__: METHOD(DEF(['self'],
 		function __init__(self) {
-			//
+			self.__uuid__ = object.__class_def__.__maxuuid__;
+			object.__class_def__.__maxuuid__++;
 		})),
 	__copy__: METHOD(DEF(['self'],
 		function __copy__(self) {
@@ -915,5 +917,9 @@ object = CLASS(None, 'object', {
 			}
 
 			throw KeyException('%s'.interpolate(name));
+		})),
+	toString: METHOD(DEF(['self'],
+		function toString(self) {
+			return '<%s at #%s>'.interpolate(self.__class__.__name__, self.__uuid__);
 		})),
 });
