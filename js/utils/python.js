@@ -219,7 +219,9 @@ DEF = (function defineDEF() {
 		}
 
 		if (collectArgDefItem(defObj, arg, argDef, ['isinstance', 'is-a', 'is'])) {
-			var i = 0;
+			if (!isArray(argDef.isinstance)) {
+				throw DE(defObj, "isinstance must be an array");
+			}
 		}
 
 		var hasDefault = collectArgDefItem(defObj, arg, argDef, ['default', 'd']);
@@ -384,7 +386,10 @@ DEF = (function defineDEF() {
 			throw CE(argObj, '*args was not an array');
 		}
 		if (!isObject(argObj.kwargs)) {
-			throw CE(argObj, '*kwargs was not an object');
+			throw CE(argObj, '**kwargs was not an object');
+		} else if (isinstance(argObj.kwargs, object)) {
+			throw CE(argObj, '**kwargs should not be a Python object - did you ' +
+							 'forget to use Python.js style argument passing?');
 		}
 	}
 
@@ -454,9 +459,15 @@ DEF = (function defineDEF() {
 
 	function validateArguments(argObj) {
 		for (var i = 0, argDef ; argDef = argObj.defObj.argDefs[i] ; i++) {
+			if (i >= argObj.passArguments.length) {
+				break;
+			}
 			var arg = argObj.passArguments[i];
 			if (arg === null) {
 				continue;
+			}
+			if (typeof arg == "undefined") {
+				throw CE(argObj, "%s was 'undefined', which is not allowed".interpolate(argDef.name));
 			}
 
 			if (argDef.isinstance) {
@@ -598,12 +609,26 @@ ClassException = DEFEXCEPTION('ClassException');
 object = null;
 CLASSES = {};
 function isinstance(obj, cls) {
+	if (!obj || !obj.__class__) {
+		return false;
+	}
+	if (!cls) {
+		return false;
+	}
+	if (cls.__class_def__) {
+		cls = cls.__class_def__;
+	}
+	if (!cls.__PYTHON_CLASS__) {
+		return false;
+	}
+
 	var objCls = obj.__class__;
-	while (cls) {
-		if (objCls == cls || objCls == cls.__class_def__) {
+
+	while (objCls) {
+		if (objCls == cls) {
 			return true;
 		}
-		cls = cls.__base__;
+		objCls = objCls.__base__;
 	}
 
 	return false;
