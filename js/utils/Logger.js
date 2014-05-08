@@ -15,6 +15,19 @@ var Logger = CLASS('utils.Logger', {
 
 			return str;
 		})),
+	toggle: METHOD(DEF(
+		['self', {n: 'to', d: None}],
+		function toggle(self, to) {
+			if (to === None) {
+				to = !self.muted;
+			}
+
+			if (to) {
+				self.mute();
+			} else {
+				self.unmute();
+			}
+		})),
 	mute: METHOD(DEF(
 		['self'],
 		function mute(self) {
@@ -80,9 +93,9 @@ var Logger = CLASS('utils.Logger', {
 		function indent(self, count) {
 			return self.setIndent([self.tabcount + count]);
 		})),
-	unident: METHOD(DEF(
+	dedent: METHOD(DEF(
 		['self', {n: 'count', d: 1}],
-		function unident(self, count) {
+		function dedent(self, count) {
 			return self.setIndent([self.tabcount - count]);
 		})),
 	reset: METHOD(DEF(
