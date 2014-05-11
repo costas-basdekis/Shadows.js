@@ -1,5 +1,5 @@
-var Shadows = (function definePolarLine(obj) {
-	var Math = Shadows.Math;
+var Shadows = (function definePolarLine(obj, jsMath) {
+	var Math = Shadows.Math, Polar = Math.Polar;
 	var PolarLine = obj.PolarLine = CLASS('Shadows.PolarLine', {
 		__init__: METHOD(DEF(
 			['self', 
@@ -33,6 +33,8 @@ var Shadows = (function definePolarLine(obj) {
 				self.start.fromCartesian([other.start]);
 				self.end.fromCartesian([other.end]);
 
+				self.proper();
+
 				return self;
 			})),
 		toCartesian: METHOD(DEF(
@@ -56,21 +58,39 @@ var Shadows = (function definePolarLine(obj) {
 				return self.start.equals(other.start) &&
 					   self.end.equals(other.end);
 			})),
+		isProper: METHOD(DEF(
+			['self'],
+			function isProper(self) {
+				var diff = Polar.angleDiff([self.start.angle, self.end.angle]);
+
+				return Math.CILt([diff, Polar.HALF_CIRCLE]);
+			})),
+		proper: METHOD(DEF(
+			['self'],
+			function proper(self) {
+				if (!self.isProper()) {
+					var temp = self.start;
+					self.start = self.end;
+					self.end = temp;
+				}
+
+				return self;
+			})),
 		isEmpty: METHOD(DEF(
 			['self'],
 			function isEmpty(self) {
-				return Shadows.Math.CIEq([self.start.angle, self.end.angle]);
+				return Math.CIEq([self.start.angle, self.end.angle]);
 			})),
 		isOnPoint: METHOD(DEF(
 			['self'],
 			function isOnPoint(self) {
 				// If either endpoint is on 0, or the angle between is 180
-				return Shadows.Math.CIEq([self.start.distance, 0]) ||
-					   Shadows.Math.CIEq([self.end.distance, 0]) ||
-					   Shadows.Math.CIEq([
-					   		Shadows.Math.Polar.angleDiff([self.start.distance,
+				return Math.CIEq([self.start.distance, 0]) ||
+					   Math.CIEq([self.end.distance, 0]) ||
+					   Math.CIEq([
+					   		Polar.angleDiff([self.start.distance,
 					   									 self.end.distance]),
-					   		Shadows.Math.Polar.HALF_CIRCLE,
+					   		Polar.HALF_CIRCLE,
 					   	]);
 			})),
 		containsAngle: METHOD(DEF(
@@ -78,19 +98,19 @@ var Shadows = (function definePolarLine(obj) {
 			function containsAngle(self, angle) {
 				var startDiff, sectionLength;
 
-				startDiff = Shadows.Math.Polar.angleDiff([self.start.angle, angle]);
-				sectionLength = Shadows.Math.Polar.angleDiff([self.start.angle,
-													  self.end.angle]);
+				startDiff = Polar.angleDiff([self.start.angle, angle]);
+				sectionLength = Polar.angleDiff([self.start.angle,
+												 self.end.angle]);
 
-				return Shadows.Math.CILt([0, startDiff]) &&
-					   Shadows.Math.CILt([startDiff, sectionLength]);
+				return Math.CILt([0, startDiff]) &&
+					   Math.CILt([startDiff, sectionLength]);
 			})),
 		hasSameRange: METHOD(DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}],
 			function hasSameRange(self, other) {
 				return (
-					Shadows.Math.CIEq([self.start.angle, other.start.angle]) &&
-					Shadows.Math.CIEq([self.end.angle, other.end.angle]));
+					Math.CIEq([self.start.angle, other.start.angle]) &&
+					Math.CIEq([self.end.angle, other.end.angle]));
 			})),
 		intersects: METHOD(DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}],
@@ -105,7 +125,7 @@ var Shadows = (function definePolarLine(obj) {
 		isAdjacentTo: METHOD(DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}, {n: 'inOrder', d: False}],
 			function isAdjacentTo(self, other, inOrder) {
-				var isBefore = Shadows.Math.CIEq([self.end.angle, other.start.angle]);
+				var isBefore = Math.CIEq([self.end.angle, other.start.angle]);
 
 				if (isBefore) {
 					return True;
@@ -115,11 +135,11 @@ var Shadows = (function definePolarLine(obj) {
 					return False;
 				}
 
-				var isAfter = Shadows.Math.CIEq([other.end.angle, self.start.angle]);
+				var isAfter = Math.CIEq([other.end.angle, self.start.angle]);
 
 				return isAfter;
 			})),
 	});
 
 	return obj;
-})(Shadows || {});
+})(Shadows || {}, Math);

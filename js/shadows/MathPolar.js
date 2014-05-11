@@ -12,29 +12,38 @@ var Shadows = (function defineMathPolar(obj, jsMath) {
 			['start', 'end'],
 			function angleDiff(start, end) {
 				var diff = end - start;
+				var constricted = Polar.constrict([diff, 0]);
 
-				while (diff > CIRCLE) {
-					diff -= CIRCLE;
-				}
-				while (diff <= -CIRCLE) {
-					diff += CIRCLE;
-				}
-
-				return diff;
+				return constricted;
 			}),
 		proper: DEF(namespace,
 			['angle'],
 			function proper(angle){
 				var proper = angle;
 
-				while (proper > jsMath.PI) {
+				while (proper > HALF_CIRCLE) {
 					proper -= CIRCLE;
 				}
-				while (proper <= -jsMath.PI) {
+				while (proper <= -HALF_CIRCLE) {
 					proper += CIRCLE;
 				}
 
 				return proper;
+			}),
+		constrict: DEF(namespace,
+			['angle', 'start'],
+			function constrict(angle, start) {
+				var constricted = angle;
+				var end = start + CIRCLE;
+
+				while (constricted >= end) {
+					constricted -= CIRCLE;
+				}
+				while (constricted < start) {
+					constricted += CIRCLE;
+				}
+
+				return constricted;
 			}),
 	};
 

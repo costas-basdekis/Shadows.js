@@ -143,11 +143,11 @@ test("PolarPoint", function() {
 	ok(p.offsetAngle([0]) == p, "offsetAngle works");
 	p.set({angle: 0, distance: 1});
 	p.offsetAngle([0]);
-	equal(p.angle, 0, "offsetAngle can do nothing");
+	ok(Shadows.Math.CIEq([p.angle, 0]), "offsetAngle can do nothing");
 	p.offsetAngle([Math.PI / 4]);
-	equal(p.angle, -Math.PI / 4, "offsetAngle offsets");
+	ok(Shadows.Math.CIEq([p.angle, -Math.PI / 4]), "offsetAngle offsets %s != %s".interpolate(p.angle, -Math.PI / 4));
 	p.offsetAngle([Math.PI / 8]);
-	equal(p.angle, -Math.PI * 3 / 8, "offsetAngle offsets");
+	ok(Shadows.Math.CIEq([p.angle, -Math.PI * 3 / 8]), "offsetAngle offsets");
 });
 
 

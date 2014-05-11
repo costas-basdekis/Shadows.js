@@ -41,6 +41,7 @@ var Shadows = (function definePolarPoint(obj) {
 			['self', 'angle'],
 			function offsetAngle(self, angle) {
 				self.angle = Shadows.Math.Polar.angleDiff([angle, self.angle]);
+				self.angle = Shadows.Math.Polar.constrict([self.angle, -Shadows.Math.Polar.HALF_CIRCLE])
 
 				return self;
 			})),
