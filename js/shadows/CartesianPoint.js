@@ -28,7 +28,7 @@ var Shadows = (function defineCartesianPoint(obj) {
 		toString: METHOD(DEF(
 			['self'],
 			function toString(self) {
-				return '[%s,%s]'.interpolate(self.x, self.y);
+				return '[%s,%s]'.interpolate(Math.round(self.x), Math.round(self.y));
 			})),
 		set: METHOD(DEF(
 			['self', 'x', 'y'],
@@ -46,6 +46,14 @@ var Shadows = (function defineCartesianPoint(obj) {
 			['self'],
 			function length(self) {
 				return Math.sqrt(self.x * self.x + self.y * self.y);
+			})),
+		plus: METHOD(DEF(
+			['self', {n:'other', is: ['Shadows.CartesianPoint']}],
+			function plus(self, other) {
+				self.x += other.x;
+				self.y += other.y;
+
+				return self;
 			})),
 		minus: METHOD(DEF(
 			['self', {n:'other', is: ['Shadows.CartesianPoint']}],
@@ -84,6 +92,14 @@ var Shadows = (function defineCartesianPoint(obj) {
 				polar.fromCartesian([self]);
 
 				return polar;
+			})),
+		fromPolar: METHOD(DEF(
+			['self', {n: 'other', is: ['Shadows.PolarPoint']}],
+			function fromPolar(self, other) {
+				self.set({
+					x: other.distance * Math.cos(other.angle),
+					y: other.distance * Math.sin(other.angle),
+				});
 			})),
 	});
 

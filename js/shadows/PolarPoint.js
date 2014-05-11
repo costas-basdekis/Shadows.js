@@ -15,6 +15,16 @@ var Shadows = (function definePolarPoint(obj) {
 					distance: self.distance,
 				});
 			})),
+		copyFrom: METHOD(DEF(
+			['self', {n: 'other', is: ['Shadows.PolarPoint']}],
+			function copyFrom(self, other) {
+				self.set({
+					angle: other.angle,
+					distance: other.distance,
+				});
+
+				return self;
+			})),
 		set: METHOD(DEF(
 			['self', 'angle', 'distance'],
 			function (self, angle, distance) {

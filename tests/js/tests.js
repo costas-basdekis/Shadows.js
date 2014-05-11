@@ -181,3 +181,134 @@ test("CartesianLine", function() {
 	   l1.end.x == 2 &&
 	   l1.end.y == 3, "minus is correct");
 });
+
+test("PolarLine", function() {
+	var CartesianPoint = Shadows.CartesianPoint;
+	var PolarPoint = Shadows.PolarPoint;
+	var CartesianLine = Shadows.CartesianLine;
+	var PolarLine = Shadows.PolarLine;
+
+	ok(PolarLine, "Exists");
+	ok(PolarLine(), ".Create");
+
+	var pl1 = PolarLine();
+	ok(pl1.start, "has start");
+	ok(pl1.end, "has end");
+	ok(pl1.isEmpty(), "is empty");
+	ok(pl1.isOnPoint(), "is on point");
+
+	var cl1 = CartesianLine();
+	cl1.start.set({x: -1, y: 1});
+	cl1.end.set({x: 1, y: 1});
+	pl1.fromCartesian([cl1]);
+
+	ok(pl1.start.distance == pl1.end.distance &&
+	   pl1.start.distance, "fromCartesian works");
+
+	var onPointTestCases = [
+		{
+			start: {x: 1, y: 0},
+			end: {x: -1, y: 0},
+		},
+		{
+			start: {x: -1, y: 0},
+			end: {x: 1, y: 0},
+		},
+		{
+			start: {x: 0, y: 1},
+			end: {x: 0, y: -1},
+		},
+		{
+			start: {x: 0, y: -1},
+			end: {x: 0, y: 1},
+		},
+		{
+			start: {x: 1, y: 1},
+			end: {x: -1, y: -1},
+		},
+	];
+	for (var i = 0, testCase ; testCase = onPointTestCases[i] ; i++) {
+		cl1.start.set(testCase.start);
+		cl1.end.set(testCase.end);
+		pl1.fromCartesian([cl1]);
+		ok(pl1.isOnPoint, "is on point, when not on the edge")
+	}
+
+	var adjacentTestCases = [
+		[
+			{start: {distance:1, angle: 0}, end: {distance:1, angle: 1}},
+			{start: {distance:1, angle: 1}, end: {distance:1, angle: 2}},
+		],
+		[
+			{start: {distance:1, angle: 0}, end: {distance:1, angle: 1}},
+			{start: {distance:0.5, angle: 1}, end: {distance:2, angle: 2}},
+		],
+	];
+
+	var pl2 = PolarLine();
+
+	for (var i = 0, testCase ; testCase = adjacentTestCases[i] ; i++) {
+		pl1.start.set(testCase[0].start);
+		pl1.end.set(testCase[0].end);
+		pl2.start.set(testCase[1].start);
+		pl2.end.set(testCase[1].end);
+		ok(pl1.isAdjacentTo([pl2], {inOrder: True}), "are adjacent in order");
+		ok(pl2.isAdjacentTo([pl1], {inOrder: False}), "are adjacent reverse order");
+		ok(!pl1.intersects([pl2]), "do not intersect");
+		ok(!pl2.intersects([pl1]), "do not intersect reverse");
+	}
+
+	var notAdjacentTestCases = [
+		[
+			{start: {distance:1, angle: 0}, end: {distance:1, angle: 1}},
+			{start: {distance:1, angle: 2}, end: {distance:1, angle: 3}},
+		],
+		[
+			{start: {distance:1, angle: 0}, end: {distance:1, angle: 1}},
+			{start: {distance:0.5, angle: 2}, end: {distance:2, angle: 3}},
+		],
+		[
+			{start: {distance:1, angle: 0}, end: {distance:1, angle: 2}},
+			{start: {distance:1, angle: 1}, end: {distance:1, angle: 3}},
+		],
+	];
+
+	for (var i = 0, testCase ; testCase = notAdjacentTestCases[i] ; i++) {
+		pl1.start.set(testCase[0].start);
+		pl1.end.set(testCase[0].end);
+		pl2.start.set(testCase[1].start);
+		pl2.end.set(testCase[1].end);
+		ok(!pl1.isAdjacentTo([pl2], {inOrder: True}), "are not adjacent in order");
+		ok(!pl2.isAdjacentTo([pl1], {inOrder: False}), "are not adjacent reverse order");
+	}
+
+	var intersectTestCases = [
+		[
+			{start: {distance:1, angle: 0}, end: {distance:1, angle: 2}},
+			{start: {distance:1, angle: 1}, end: {distance:1, angle: 3}},
+		],
+	];
+
+	for (var i = 0, testCase ; testCase = intersectTestCases[i] ; i++) {
+		pl1.start.set(testCase[0].start);
+		pl1.end.set(testCase[0].end);
+		pl2.start.set(testCase[1].start);
+		pl2.end.set(testCase[1].end);
+		ok(pl1.intersects([pl2]), "intersect");
+		ok(pl2.intersects([pl1]), "intersect reverse");
+	}
+
+	var containsAngleTestCases = [
+		{start: {distance: 1, angle: 0}, end: {distance: 1, angle: 1}, angle: 0.5},
+		{start: {distance: 1, angle: 1}, end: {distance: 1, angle: 2}, angle: 1.5},
+		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: 0},
+		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: -0.5},
+		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: 0.5},
+	];
+
+	for (var i = 0, testCase ; testCase = containsAngleTestCases[i] ; i++) {
+		pl1.start.set(testCase.start);
+		pl1.end.set(testCase.end);
+		ok(pl1.containsAngle([testCase.angle]), "contains angle");
+	}
+});

@@ -1,10 +1,13 @@
 var Shadows = (function defineMathPolar(obj, jsMath) {
 	var Math = obj.Math;
 
-	var CIRCLE = 2 * jsMath.PI;
+	var HALF_CIRCLE = jsMath.PI;
+	var CIRCLE = 2 * HALF_CIRCLE;
 
 	var namespace = 'Shadows.MathPolar';
 	var Polar = Math.Polar = {
+		CIRCLE: CIRCLE,
+		HALF_CIRCLE: HALF_CIRCLE,
 		angleDiff: DEF(namespace,
 			['start', 'end'],
 			function angleDiff(start, end) {

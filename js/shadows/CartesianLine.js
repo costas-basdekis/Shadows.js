@@ -24,6 +24,11 @@ var Shadows = (function defineCartesianLine(obj) {
 					end: self.end.__deepcopy__(),
 				});
 			})),
+		toString: METHOD(DEF(
+			['self'],
+			function toString(self) {
+				return '[%s - %s]'.interpolate(self.start, self.end);
+			})),
 		copyFrom: METHOD(DEF(
 			['self', {n: 'other', is:['Shadows.CartesianLine']}],
 			function copyFrom (self, other) {
@@ -35,6 +40,14 @@ var Shadows = (function defineCartesianLine(obj) {
 			function length(self) {
 				var diff = self.end.__copy__().minus([self.start]);
 				return diff.length();
+			})),
+		plus: METHOD(DEF(
+			['self', {n: 'point', is: [Shadows.CartesianPoint]}],
+			function (self, point) {
+				self.start.plus([point]);
+				self.end.plus([point]);
+
+				return self;
 			})),
 		minus: METHOD(DEF(
 			['self', {n: 'point', is: [Shadows.CartesianPoint]}],
@@ -51,6 +64,12 @@ var Shadows = (function defineCartesianLine(obj) {
 				polar.fromCartesian([self]);
 
 				return polar;
+			})),
+		fromPolar: METHOD(DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLine']}],
+			function fromPolar(self, other) {
+				self.start.fromPolar([other.start]);
+				self.end.fromPolar([other.end]);
 			})),
 	});
 
