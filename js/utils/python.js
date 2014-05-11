@@ -159,7 +159,7 @@ CallException = DEFEXCEPTION('CallException', PythonException);
 //To call this, pass a list and an array, or ommit any if they are empty
 //Passing the wrong arguments by position or name, raises a relevant exception
 //Example:
-//f1 = DEF(['a'. 'b'], function f1(a, b) {
+//f1 = DEF(function f1(a, b) {
 //	return a + b;
 //});
 //f1([1, 2]) == f1([1], {b: 2}) == f1({a:1, b:2})
@@ -319,7 +319,7 @@ DEF = (function defineDEF() {
 
 	function collectArgumentDefinitions(defObj) {
 		if (!isArray(defObj.argDefs)) {
-			throw DE(defObj, 'Arguments were not passed');
+			throw DE(defObj, 'Arguments were not an array');
 		}
 
 		//Keep a set of defined argument names
@@ -339,19 +339,31 @@ DEF = (function defineDEF() {
 		}
 	}
 
+	var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+	function getArgumentNames(func) {
+		var fnStr = func.toString();
+		var fnStrStripped = fnStr.replace(STRIP_COMMENTS, '');
+		var fnStrArgs = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')'));
+		var argNames = fnStrArgs.match(/([^\s,]+)/g);
+		if(argNames === null){
+	  		argNames = [];
+	 	}
+		return argNames;
+	}
+
 	function makeDEF(defObj) {
-		//Allow the definitions to be implied as empty
+		//Allow the definitions to be implied
 		if (defObj.arguments.length == 1) {
 			defObj.func = defObj.arguments[0];
 			defObj.namespace = '';
-			defObj.argDefs = [];
+			defObj.argDefs = getArgumentNames(defObj.func);
 		} else if (defObj.arguments.length == 2) {
 			defObj.func = defObj.arguments[1];
 			if (isArray(defObj.arguments[0])) {
 				defObj.argDefs = defObj.arguments[0];
 				defObj.namespace = '';
 			} else {
-				defObj.argDefs = [];
+				defObj.argDefs = getArgumentNames(defObj.func);
 				defObj.namespace = defObj.arguments[0];
 			}
 		} else if (defObj.arguments.length != 3) {
@@ -591,6 +603,7 @@ DEF = (function defineDEF() {
 			defObj.fullname = '%s.%s'.interpolate(
 				defObj.namespace, defObj.fullname);
 		}
+		decorated.__PYTHON_FUNC__ = True;
 		decorated.__funcdef__ = defObj;
 		decorated.__funcname__ = defObj.fullname;
 	}
