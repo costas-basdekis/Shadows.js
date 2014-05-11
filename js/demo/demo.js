@@ -5,6 +5,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App.init = function init() {
 		this.initPaper();
 		this.initWalls();
+		this.initShadows();
 		this.initMouse()
 		this.redraw();
 	};
@@ -17,6 +18,10 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App.initWalls = function initWalls() {
 		this.createWalls();
 	};
+
+	App.initShadows = function initShadows() {
+		this.createShadows();
+	}
 
 	App.initMouse = function initMouse() {
 		this.Tools.MoveCenter.init();

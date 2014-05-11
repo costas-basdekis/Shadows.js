@@ -3,7 +3,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	App.walls = [];
 	App.paper = App.paper || {}
-	App.paper.wallsPath;
+	App.paper.wallsPath = null;
 
 	App.createWalls = function createWalls() {
 		this.addOuterBox();
@@ -13,7 +13,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	};
 
 	App.addOuterBox = function addOuterBox () {
-		this.addBox({x: 10, y: 10}, {x: 190, y: 190});
+		this.addBox({x: 10, y: 10}, {x: 590, y: 590});
 	};
 
 	App.addBox = function addBox(start, end) {

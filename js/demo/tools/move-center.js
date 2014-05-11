@@ -8,11 +8,20 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	Tool.computeSections = null;
 	Tool.center = Shadows.CartesianPoint();
+	Tool.fps = {
+		sum: 0,
+		samples: [],
+		maxSampleCount: 100,
+	};
 
 	Tool.init = function init() {
 		var path = App.paper.centerPath = new _.Path.Circle({x: 50, y: 50}, 15);
 		path.strokeColor = 'black';
 		path.fillColor = 'black';
+
+		var computeSections = this.computeSections = Shadows.Sections.Compute({
+			lines: App.walls,
+		});
 	};
 
 	Tool.onMouseDown =
@@ -23,15 +32,35 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 			x: event.point.x,
 			y: event.point.y,
 		});
-		var computeSections = this.computeSections = Shadows.Sections.Compute({
-			lines: App.walls,
-			center: this.center,
+		var computeSections = this.computeSections;
+		console.clear();
+		var muteLogger = document.getElementById('muteLogger').checked;
+		computeSections.logger.toggle([muteLogger]);
+		var fpsSample = new Date;
+		computeSections.compute({
+			center: this.center,			
 		});
-		computeSections.start();
-		while (computeSections.hasSteps()) {
-			computeSections.step();
+		fpsSample = (new Date) - fpsSample;
+		this.updateFPS(fpsSample / 1000);
+		App.updateShadows(computeSections.sections);
+	};
+
+	Tool.updateFPS = function updateFPS(sample) {
+		var fps = this.fps;
+		if (typeof sample !== "undefined") {
+			fps.samples.push(sample);
+			fps.sum += sample;
+			while (fps.samples.length >= fps.maxSampleCount) {
+				fps.sum -= fps.samples.shift();
+			}
 		}
-		computeSections.finish();
+		var label = "";
+
+		if (fps.samples.length) {
+			label = Math.round(fps.samples.length / fps.sum);
+		}
+
+		document.getElementById('fps').innerText = label;
 	};
 
 	return obj;

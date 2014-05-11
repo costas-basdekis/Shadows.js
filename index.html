@@ -13,13 +13,25 @@
 	<script type="text/javascript" src="js/shadows/Math.js"></script>
 	<script type="text/javascript" src="js/shadows/MathPolar.js"></script>
 	<script type="text/javascript" src="js/shadows/Sections/Compute.js"></script>
+	<script type="text/javascript" src="js/shadows/Sections/Sections.js"></script>
 
 	<script type="text/javascript" src="js/demo/demo.js"></script>
 	<script type="text/javascript" src="js/demo/create-walls.js"></script>
+	<script type="text/javascript" src="js/demo/draw-shadows.js"></script>
 	<script type="text/javascript" src="js/demo/tools/move-center.js"></script>
 </head>
 <body>
 	<a href="tests/tests.html">Tests page</a>
+	<br/>
+	<label>
+		Mute Logger
+		<input type="checkbox" id="muteLogger">
+	</label>
+	<br/>
+	<label>
+		FPS:
+		<span id="fps"></span>
+	</label>
 	<canvas id="myCanvas" resize></canvas>
 
 	<script type="text/javascript">
