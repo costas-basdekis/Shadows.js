@@ -3,27 +3,25 @@ var Shadows = (function defineSectionsSections(obj) {
 
 	var SectionsModule = Shadows.Sections = Shadows.Sections || {};
 	var Sections = SectionsModule.Sections = CLASS('Shadows.Sections.Sections', {
-		__init__: METHOD(DEF(
+		__init__: DEF(
 			['self', {n: 'logger', is: ['utils.Logger']}],
 			function __init__(self, logger) {
 				self.sections = [];
 				self.sectionsReserve = [];
 				self.logger = logger;
-			})),
-		log: METHOD(DEF(
-			['self'],
+			}),
+		log: 
 			function log(self) {
 				for (var i = 0, section ; section = self.sections[i] ; i++) {
 					self.logger.log(["%s %s", i + 1, section]);
 				}
-			})),
-		clear: METHOD(DEF(
-			['self'],
+			},
+		clear: 
 			function clear(self) {
 				self.sectionsReserve = self.sections.concat(self.sectionsReserve);
 				self.sections = [];
-			})),
-		insert: METHOD(DEF(
+			},
+		insert: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function insert(self, section) {
 				var intersects = self.intersects([section]);
@@ -35,8 +33,8 @@ var Shadows = (function defineSectionsSections(obj) {
 				} else {
 					self.insertNoConflicts([section]);
 				}
-			})),
-		intersects: METHOD(DEF(
+			}),
+		intersects: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function intersects(self, section) {
 				var batchStart, batchEnd, batchSection = PolarLine();
@@ -62,8 +60,8 @@ var Shadows = (function defineSectionsSections(obj) {
 				}
 
 				return False;
-			})),
-		insertNoConflicts: METHOD(DEF(
+			}),
+		insertNoConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function insertNoConflicts(self, section) {
 				if (self.sections.length == 0) {
@@ -99,14 +97,13 @@ var Shadows = (function defineSectionsSections(obj) {
 				}
 
 				throw new ExceptionBase("insertNoConflicts did not insert");
-			})),
-		insertConflicts: METHOD(DEF(
+			}),
+		insertConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function insertConflicts(self, section) {
 
-			})),
-		getBatchEnd: METHOD(DEF(
-			['self', 'batchStart'],
+			}),
+		getBatchEnd: 
 			function getBatchEnd(self, batchStart) {
 				var prevSection = self.sections[batchStart];
 
@@ -118,24 +115,24 @@ var Shadows = (function defineSectionsSections(obj) {
 				}
 
 				return self.sections.length - 1;
-			})),
-		_insertInitial: METHOD(DEF(
+			},
+		_insertInitial: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function _insertInitial(self, section) {
 				var	iSection = section.__deepcopy__();
 
 				self.sections.push(iSection);
-			})),
-		_insertBefore: METHOD(DEF(
+			}),
+		_insertBefore: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
 			function _insertBefore(self, section, index) {
 				self.sections.splice(index, 0, section);
-			})),
-		_insertAfter: METHOD(DEF(
+			}),
+		_insertAfter: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
 			function _insertAfter(self, section, index) {
 				self.sections.splice(index + 1, 0, section);
-			})),
+			}),
 	});
 
 	return obj;

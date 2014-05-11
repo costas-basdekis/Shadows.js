@@ -9,7 +9,6 @@ var Shadows = (function defineMathPolar(obj, jsMath) {
 		CIRCLE: CIRCLE,
 		HALF_CIRCLE: HALF_CIRCLE,
 		angleDiff: DEF(namespace,
-			['start', 'end'],
 			function angleDiff(start, end) {
 				var diff = end - start;
 				var constricted = Polar.constrict([diff, 0]);
@@ -17,7 +16,6 @@ var Shadows = (function defineMathPolar(obj, jsMath) {
 				return constricted;
 			}),
 		proper: DEF(namespace,
-			['angle'],
 			function proper(angle){
 				var proper = angle;
 
@@ -31,7 +29,6 @@ var Shadows = (function defineMathPolar(obj, jsMath) {
 				return proper;
 			}),
 		constrict: DEF(namespace,
-			['angle', 'start'],
 			function constrict(angle, start) {
 				var constricted = angle;
 				var end = start + CIRCLE;

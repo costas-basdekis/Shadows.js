@@ -1,21 +1,20 @@
 var Shadows = (function defineCartesianPoint(obj) {
 	var CartesianPoint = obj.CartesianPoint = CLASS('Shadows.CartesianPoint', {
-		__init__: METHOD(DEF(
+		__init__: DEF(
 			['self', {n: 'x', d: 0}, {n: 'y', d: 0}],
 			function __init__(self, x, y) {
 				self.__super__({name: '__init__'})();
 
 				self.set({x:x, y:y});
-			})),
-		__copy__: METHOD(DEF(
-			['self'],
+			}),
+		__copy__: 
 			function __copy__(self) {
 				return CartesianPoint({
 					x: self.x,
 					y: self.y,
 				});
-			})),
-		copyFrom: METHOD(DEF(
+			},
+		copyFrom: DEF(
 			['self', {n: 'other', is: ['Shadows.CartesianPoint']}],
 			function copyFrom(self, other) {
 				self.set({
@@ -24,47 +23,43 @@ var Shadows = (function defineCartesianPoint(obj) {
 				});
 
 				return self;
-			})),
-		toString: METHOD(DEF(
-			['self'],
+			}),
+		toString: 
 			function toString(self) {
 				return '[%s,%s]'.interpolate(Math.round(self.x), Math.round(self.y));
-			})),
-		set: METHOD(DEF(
-			['self', 'x', 'y'],
+			},
+		set: 
 			function (self, x, y) {
 				self.x = x;
 				self.y = y;
-			})),
-		equals: METHOD(DEF(
+			},
+		equals: DEF(
 			['self', {n: 'other', is: ['Shadows.CartesianPoint']}],
 			function equals(self, other) {
 				return Shadows.Math.CIEq([self.x, other.x]) &&
 					   Shadows.Math.CIEq([self.y, other.y]);
-			})),
-		length: METHOD(DEF(
-			['self'],
+			}),
+		length: 
 			function length(self) {
 				return Math.sqrt(self.x * self.x + self.y * self.y);
-			})),
-		plus: METHOD(DEF(
+			},
+		plus: DEF(
 			['self', {n:'other', is: ['Shadows.CartesianPoint']}],
 			function plus(self, other) {
 				self.x += other.x;
 				self.y += other.y;
 
 				return self;
-			})),
-		minus: METHOD(DEF(
+			}),
+		minus: DEF(
 			['self', {n:'other', is: ['Shadows.CartesianPoint']}],
 			function minus(self, other) {
 				self.x -= other.x;
 				self.y -= other.y;
 
 				return self;
-			})),
-		getAngle: METHOD(DEF(
-			['self'],
+			}),
+		getAngle: 
 			function getAngle(self) {
 				var angle;
 
@@ -84,23 +79,22 @@ var Shadows = (function defineCartesianPoint(obj) {
 				var proper = Shadows.Math.Polar.proper([angle]);
 
 				return proper;
-			})),
-		toPolar: METHOD(DEF(
-			['self'],
+			},
+		toPolar: 
 			function toPolar(self) {
 				var polar = Shadows.PolarPoint();
 				polar.fromCartesian([self]);
 
 				return polar;
-			})),
-		fromPolar: METHOD(DEF(
+			},
+		fromPolar: DEF(
 			['self', {n: 'other', is: ['Shadows.PolarPoint']}],
 			function fromPolar(self, other) {
 				self.set({
 					x: other.distance * Math.cos(other.angle),
 					y: other.distance * Math.sin(other.angle),
 				});
-			})),
+			}),
 	});
 
 	return obj;

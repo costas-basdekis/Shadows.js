@@ -1,21 +1,20 @@
 var Logger = CLASS('utils.Logger', {
-	__init__: METHOD(DEF(
+	__init__: DEF(
 		['self', {n: 'tab', d: '    '}, {n:'muted', d: True}],
 		function __init__ (self, tab, muted) {
 			self.tab = tab;
 			self.tabcount = 0;
 			self.tabs = '';
 			self.muted = bool(muted);
-		})),
-	render: METHOD(DEF(
-		['self', 'format', 'args'],
+		}),
+	render: 
 		function render(self, format, args) {
 			var str = format.interpolate.apply(format, args);
 			str = '%s%s'.interpolate(self.tabs, str);
 
 			return str;
-		})),
-	toggle: METHOD(DEF(
+		},
+	toggle: DEF(
 		['self', {n: 'to', d: None}],
 		function toggle(self, to) {
 			if (to === None) {
@@ -27,18 +26,16 @@ var Logger = CLASS('utils.Logger', {
 			} else {
 				self.unmute();
 			}
-		})),
-	mute: METHOD(DEF(
-		['self'],
+		}),
+	mute: 
 		function mute(self) {
 			self.muted = True;
-		})),
-	unmute: METHOD(DEF(
-		['self'],
+		},
+	unmute: 
 		function unmute(self) {
 			self.muted = False;
-		})),
-	log: METHOD(DEF(
+		},
+	log: DEF(
 		['self', 'format', '*'],
 		function log(self, format, args) {
 			if (self.muted) {
@@ -50,8 +47,8 @@ var Logger = CLASS('utils.Logger', {
 			console.log(str);
 
 			return str;
-		})),
-	warning: METHOD(DEF(
+		}),
+	warning: DEF(
 		['self', 'format', '*'],
 		function warning(self, format, args) {
 			if (self.muted) {
@@ -63,8 +60,8 @@ var Logger = CLASS('utils.Logger', {
 			console.warning(str);
 
 			return str;
-		})),
-	error: METHOD(DEF(
+		}),
+	error: DEF(
 		['self', 'format', '*'],
 		function error(self, format, args) {
 			if (self.muted) {
@@ -76,9 +73,8 @@ var Logger = CLASS('utils.Logger', {
 			console.error(str);
 
 			return str;
-		})),
-	setIndent: METHOD(DEF(
-		['self', 'count'],
+		}),
+	setIndent: 
 		function setIndent(self, count) {
 			count = parseInt(count);
 			if (count >= 0 && !isNaN(count)) {
@@ -87,24 +83,23 @@ var Logger = CLASS('utils.Logger', {
 			}
 
 			return self.tabcount;
-		})),
-	indent: METHOD(DEF(
+		},
+	indent: DEF(
 		['self', {n: 'count', d: 1}],
 		function indent(self, count) {
 			return self.setIndent([self.tabcount + count]);
-		})),
-	dedent: METHOD(DEF(
+		}),
+	dedent: DEF(
 		['self', {n: 'count', d: 1}],
 		function dedent(self, count) {
 			return self.setIndent([self.tabcount - count]);
-		})),
-	reset: METHOD(DEF(
+		}),
+	reset: DEF(
 		['self'],
 		function  reset (self) {
 			return self.setIndent([0]);
-		})),
-	updateTabs: METHOD(DEF(
-		['self'],
+		}),
+	updateTabs: 
 		function updateTabs (self) {
 			var tabs = '';
 
@@ -115,5 +110,5 @@ var Logger = CLASS('utils.Logger', {
 			self.tabs = tabs;
 
 			return self.tabs;
-		})),
+		},
 })

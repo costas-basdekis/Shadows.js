@@ -796,6 +796,17 @@ CLASS = (function defineCLASS() {
 		return obj;
 	}
 
+	function makeMethods(cls) {
+		var keys = getBaseKeys(cls);
+
+		for (var i = 0, key ; key = keys[i] ; i++) {
+			var item = cls[key];
+			if (isFunction(item) && !item.__bind__) {
+				cls[key] = METHOD(item);
+			}
+		}
+	}
+
 	function CLASS(base, name, cls) {
 		if (arguments.length == 2) {
 			cls = arguments[1];
@@ -805,6 +816,7 @@ CLASS = (function defineCLASS() {
 			throw ClassException('More than base, name and class were passed');
 		}
 
+		makeMethods(cls);
 		setBase(base, name, cls);
 
 		var __new__ = DEF(["*", "**"],
@@ -845,6 +857,10 @@ METHOD = (function defineMETHOD() {
 	}
 
 	function METHOD(func) {
+		if (!func.__PYTHON_FUNC__) {
+			func = DEF(func);
+		}
+
 		func.__bind__ = bind;
 
 		return func;
@@ -875,6 +891,10 @@ CLASSMETHOD = (function defineCLASSMETHOD() {
 	}
 
 	function CLASSMETHOD(func) {
+		if (!func.__PYTHON_FUNC__) {
+			func = DEF(func);
+		}
+		
 		func.__bind__ = bind;
 
 		return func;
@@ -891,12 +911,32 @@ STATICMETHOD = (function defineSTATICMETHOD() {
 	}
 
 	function STATICMETHOD(func) {
+		if (!func.__PYTHON_FUNC__) {
+			func = DEF(func);
+		}
+		
 		func.__bind__ = bind;
 
 		return func;
 	};
 
 	return STATICMETHOD;
+})();
+
+//A simple JS function, not to be auto-DEFed
+JS = (function defineJS() {
+	function bind(func, self) {
+		func.__func__ = func;
+		return func;
+	}
+
+	function JS(func) {
+		func.__bind__ = bind;
+
+		return func;
+	};
+
+	return JS;
 })();
 
 //The base class of all Python classes
