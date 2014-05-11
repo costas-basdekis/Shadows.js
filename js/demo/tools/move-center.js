@@ -20,6 +20,19 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		var computeSections = this.computeSections = Shadows.Sections.Compute({
 			lines: App.walls,
 		});
+
+		document.getElementById('muteLogger').onclick = this.muteLogger_onclick;
+		document.getElementById('debugDrawing').onclick = this.debugDrawing_onclick;
+	};
+
+	Tool.muteLogger_onclick = function muteLogger_onclick() {
+		var muteLogger = this.checked;
+		Tool.computeSections.logger.toggle([muteLogger]);
+	};
+
+	Tool.debugDrawing_onclick = function debugDrawing_onclick() {
+		var debugDrawing = this.checked;
+		App.debugDrawing = debugDrawing;
 	};
 
 	Tool.onMouseDown =
@@ -31,14 +44,10 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 			y: event.point.y,
 		});
 
-		var muteLogger = document.getElementById('muteLogger').checked;
-		this.computeSections.logger.toggle([muteLogger]);
+		var muteLogger = this.computeSections.logger.muted;
 		if (!muteLogger) {
 			console.clear();
 		}
-
-		var debugDrawing = document.getElementById('debugDrawing').checked;
-		App.debugDrawing = debugDrawing;
 
 		this.totalFPS.start();
 

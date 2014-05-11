@@ -3,7 +3,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	App.paper = App.paper || {}
 	App.paper.shadowsPath = null;
-	App.debugDrawing = false;
+	App.debugDrawing = true;
 
 	App.createShadows = function createShadows() {
 		this.paper.shadowsPath = new _.Path();
