@@ -18,6 +18,7 @@
 	<script type="text/javascript" src="js/demo/demo.js"></script>
 	<script type="text/javascript" src="js/demo/create-walls.js"></script>
 	<script type="text/javascript" src="js/demo/draw-shadows.js"></script>
+	<script type="text/javascript" src="js/demo/fps.js"></script>
 	<script type="text/javascript" src="js/demo/tools/move-center.js"></script>
 </head>
 <body>
@@ -25,12 +26,27 @@
 	<br/>
 	<label>
 		Mute Logger
-		<input type="checkbox" id="muteLogger">
+		<input type="checkbox" id="muteLogger" checked>
 	</label>
 	<br/>
 	<label>
-		FPS:
-		<span id="fps"></span>
+		Debug drawing
+		<input type="checkbox" id="debugDrawing" checked>
+	</label>
+	<br/>
+	<label>
+		Compute FPS:
+		<span id="computeFPS"></span>
+	</label>
+	<br/>
+	<label>
+		Draw FPS:
+		<span id="drawFPS"></span>
+	</label>
+	<br/>
+	<label>
+		Total FPS:
+		<span id="totalFPS"></span>
 	</label>
 	<canvas id="myCanvas" resize></canvas>
 

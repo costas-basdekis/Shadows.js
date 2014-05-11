@@ -3,6 +3,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	App.paper = App.paper || {}
 	App.paper.shadowsPath = null;
+	App.debugDrawing = false;
 
 	App.createShadows = function createShadows() {
 		this.paper.shadowsPath = new _.Path();
@@ -39,7 +40,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 					.toCartesian()
 					.plus([shadows.center]);
 				logger.log(['Prev and this %s %s', prevCSection, cSection]);
-				if (cSection.start.equals([prevCSection.end])) {
+				if (!this.debugDrawing && cSection.start.equals([prevCSection.end])) {
 					logger.log(['Connects with end']);
 					path.moveTo(start);
 				} else {
@@ -48,7 +49,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 				}
 				path.lineTo(end);
 			} else {
-				if (cSection.start.equals([prevCSection.end])) {
+				if (!this.debugDrawing && cSection.start.equals([prevCSection.end])) {
 					logger.log(['Continue to %s', cSection.end]);
 
 					end = new _.Point(cSection.end.x, cSection.end.y);
