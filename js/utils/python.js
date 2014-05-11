@@ -499,35 +499,30 @@ DEF = (function defineDEF() {
 	}
 
 	function callFunction(argObj) {
-		//Call function
-		var result;
-
-		var args = argObj.passArguments;
-
-		if (argObj.defObj.allowArgs) {
-			args.push(argObj.passArgs);
-		}
-		if (argObj.defObj.allowKWargs) {
-			args.push(argObj.passKWargs);
-		}
-
-		argObj.result = argObj.defObj.func.apply(argObj.this, args);
-
-		return argObj.result;
 	}
 
-	function callDEF(argObj) {
+	function prepareCall(argObj) {
 		checkPased(argObj);
 		collectArgs(argObj);
 		collectKWargs(argObj);
 		makeArgumentsArray(argObj);
 		validateArguments(argObj);
-		callFunction(argObj);
 
-		return argObj.result;
+		var callArguments = argObj.passArguments;
+
+		if (argObj.defObj.allowArgs) {
+			callArguments.push(argObj.passArgs);
+		}
+		if (argObj.defObj.allowKWargs) {
+			callArguments.push(argObj.passKWargs);
+		}
+
+		argObj.callArguments = callArguments;
 	}
 
-	function handleException(argObj, e) {
+	function handleException(argObj) {
+		var e = argObj.exception;
+
 		if (e.__localexception__ == True) {
 			e.__localexception__ = False;
 			console.error(e.toString());
@@ -540,33 +535,49 @@ DEF = (function defineDEF() {
 		}
 	}
 
+	function preCall(_this, _arguments, defObj) {
+		var argObj = {
+			this: _this,
+
+			defObj: defObj,
+
+			arguments: _arguments,
+			args: _arguments[0],
+			kwargs: _arguments[1],
+
+			passArguments: [],
+			passArgumentsDict: {},
+			passArgs: [],
+			passKWargs: {},
+		};
+
+		prepareCall(argObj);
+
+		return argObj;
+	}
+
+	function postCall(argObj) {
+		if (argObj.exception) {
+			handleException(argObj);
+			throw argObj.exception;
+		}
+
+		return argObj.result;
+	}
+
 	function decorate(defObj) {
 		var func = defObj.func;
 
-		function pythonFunction(args, kwargs) {
-			var argObj = {
-				this: this,
-
-				defObj: defObj,
-
-				arguments: arguments,
-				args: args,
-				kwargs: kwargs,
-
-				passArguments: [],
-				passArgumentsDict: {},
-				passArgs: [],
-				passKWargs: {},
-			};
+		function pythonFunction() {
+			var argObj = preCall(this, arguments, defObj);
 
 			try {
-				callDEF(argObj);
+				argObj.result = func.apply(argObj.this, argObj.callArguments);
 			} catch (e) {
-				handleException(argObj, e);
-				throw e;
+				argObj.exception = e;
 			}
 
-			return argObj.result;
+			return postCall(argObj);
 		}
 
 		pythonFunction.__func__ = defObj.func;
