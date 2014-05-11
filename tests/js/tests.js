@@ -65,7 +65,7 @@ test("CartesianPoint", function() {
 
 	ok(CartesianPoint, "Exists");
 	ok(CartesianPoint(), ".Create");
-	ok(CartesianPoint.length, ".length");
+	ok(CartesianPoint().length, ".length");
 
 	var p = CartesianPoint({x: 3, y: 4});
 	equal(p.x, 3, "x passed");
