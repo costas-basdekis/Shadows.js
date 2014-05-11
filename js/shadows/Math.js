@@ -17,7 +17,7 @@ var Shadows = (function defineMath(obj, jsMath) {
 				if (jsMath.abs(diff) < this.Epsilon) {
 					return this.Compare.Equal;
 				} else {
-					return (diff < 0) ? this.Compare.LessThan :
+					return (diff > 0) ? this.Compare.LessThan :
 										this.Compare.GreaterThan;
 				}
 			}),
@@ -27,9 +27,9 @@ var Shadows = (function defineMath(obj, jsMath) {
 				var result = this.compare([lhs, rhs]);
 
 				if (desired == this.Compare.LessThanOrEqual) {
-					return result <= desired;
+					return result <= Math.Compare.Equal;
 				} else if (desired == this.Compare.GreaterThanOrEqual) {
-					return result >= desired;
+					return result >= Math.Compare.Equal;
 				} else {
 					return result == desired;
 				}
@@ -49,15 +49,25 @@ var Shadows = (function defineMath(obj, jsMath) {
 			function CINEq(lhs, rhs) {
 				return !this.compareInfix([lhs, this.Compare.Equal, rhs]);
 			}),
+		CILEq: DEF(namespace,
+			['lhs', 'rhs'],
+			function CILEq(lhs, rhs) {
+				return this.compareInfix([lhs, this.Compare.LessThanOrEqual, rhs]);
+			}),
+		CILt: DEF(namespace,
+			['lhs', 'rhs'],
+			function CILt(lhs, rhs) {
+				return this.compareInfix([lhs, this.Compare.LessThan, rhs]);
+			}),
 		CIGEq: DEF(namespace,
 			['lhs', 'rhs'],
 			function CIGEq(lhs, rhs) {
-				return !this.compareInfix([lhs, this.Compare.GreaterThanOrEqual, rhs]);
+				return this.compareInfix([lhs, this.Compare.GreaterThanOrEqual, rhs]);
 			}),
 		CIGt: DEF(namespace,
 			['lhs', 'rhs'],
 			function CIGt(lhs, rhs) {
-				return !this.compareInfix([lhs, this.Compare.GreaterThan, rhs]);
+				return this.compareInfix([lhs, this.Compare.GreaterThan, rhs]);
 			}),
 		round: DEF(namespace,
 			['number', {n: 'digits', d: 0}],

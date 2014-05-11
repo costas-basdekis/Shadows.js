@@ -12,9 +12,51 @@ test("Math", function() {
 	ok(Math, "Exists");
 	equal(Math.CIEq([1, 1]), True, "Equal works");
 	ok(Math.Epsilon != undefined, "Epsilon exists");
-	equal(Math.CIEq([1, 1 + Math.Epsilon / 2]), True, "Almost equal works ==+e/2");
-	equal(Math.CIEq([1, 1 - Math.Epsilon / 2]), True, "Almost equal works ==-e/2");
-	equal(Math.CIEq([1, 1 + Math.Epsilon * 2]), False, "Almost equal works !=+2e");
+
+	var equalTestCases = [
+		[1, 1 + Math.Epsilon / 2],
+		[1, 1 - Math.Epsilon / 2],
+	];
+	for (var i = 0, testCase ; testCase = equalTestCases[i] ; i++) {
+		ok(Math.CILEq(testCase), "Equal less-or-equal-than %s".interpolate(testCase));
+		ok(!Math.CILt(testCase), "Equal not less-than %s".interpolate(testCase));
+		ok(Math.CIEq(testCase), "Equal equal %s".interpolate(testCase));
+		ok(!Math.CIGt(testCase), "Equal not greater-than %s".interpolate(testCase));
+		ok(Math.CIGEq(testCase), "Equal greater-or-equal-than %s".interpolate(testCase));
+	}
+
+	var notEqualTestCases = [
+		[1, 1 + Math.Epsilon * 2],
+		[1, 1 - Math.Epsilon * 2],
+	];
+	for (var i = 0, testCase ; testCase = notEqualTestCases[i] ; i++) {
+		ok(Math.CINEq(testCase), "Not-equal not-equal %s".interpolate(testCase));
+		ok(!Math.CIEq(testCase), "Not-equal not equal %s".interpolate(testCase));
+	}
+
+	var lessThanTestCases = [
+		[1, 1 + Math.Epsilon * 2],
+		[1 - Math.Epsilon, 1 + Math.Epsilon],
+	];
+	for (var i = 0, testCase ; testCase = lessThanTestCases[i] ; i++) {
+		ok(Math.CILEq(testCase), "Less-than less-or-equal-than %s".interpolate(testCase));
+		ok(Math.CILt(testCase), "Less-than less-than %s".interpolate(testCase));
+		ok(!Math.CIEq(testCase), "Less-than not equal %s".interpolate(testCase));
+		ok(!Math.CIGt(testCase), "Less-than not greater-than %s".interpolate(testCase));
+		ok(!Math.CIGEq(testCase), "Less-than not greater-or-equal-than %s".interpolate(testCase));
+	}
+
+	var greaterThanTestCases = [
+		[1, 1 - Math.Epsilon * 2],
+		[1 + Math.Epsilon, 1 - Math.Epsilon],
+	];
+	for (var i = 0, testCase ; testCase = greaterThanTestCases[i] ; i++) {
+		ok(!Math.CILEq(testCase), "Greater-than not less-or-equal-than %s".interpolate(testCase));
+		ok(!Math.CILt(testCase), "Greater-than not less-than %s".interpolate(testCase));
+		ok(!Math.CIEq(testCase), "Greater-than not equal %s".interpolate(testCase));
+		ok(Math.CIGt(testCase), "Greater-than greater-than %s".interpolate(testCase));
+		ok(Math.CIGEq(testCase), "Greater-than greater-or-equal-than %s".interpolate(testCase));
+	}
 });
 
 test("CartesianPoint", function() {
