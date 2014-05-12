@@ -18,7 +18,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		path.fillColor = 'black';
 
 		var computeSections = this.computeSections = Shadows.Sections.Compute({
-			lines: App.walls,
+			lines: App.walls.lines,
 		});
 
 		document.getElementById('muteLogger').onclick = this.muteLogger_onclick;

@@ -1,7 +1,7 @@
 var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App = obj;
 
-	App.walls = [];
+	App.walls = Shadows.Walls();
 	App.paper = App.paper || {}
 	App.paper.wallsPath = null;
 
@@ -9,54 +9,11 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		this.addOuterBox();
 
 		this.paper.wallsPath = new _.Path();
-		this.linesToPath(this.walls, this.paper.wallsPath);
+		this.linesToPath(this.walls.lines, this.paper.wallsPath);
 	};
 
 	App.addOuterBox = function addOuterBox () {
-		this.addBox({x: 10, y: 10}, {x: 590, y: 590});
-	};
-
-	App.addBox = function addBox(start, end) {
-		this.walls.push(Shadows.CartesianLine({
-			start: Shadows.CartesianPoint({
-				x: start.x,
-				y: start.y
-			}),
-			end: Shadows.CartesianPoint({
-				x: end.x,
-				y: start.y
-			}),
-		}));
-		this.walls.push(Shadows.CartesianLine({
-			start: Shadows.CartesianPoint({
-				x: end.x,
-				y: start.y
-			}),
-			end: Shadows.CartesianPoint({
-				x: end.x,
-				y: end.y
-			}),
-		}));
-		this.walls.push(Shadows.CartesianLine({
-			start: Shadows.CartesianPoint({
-				x: end.x,
-				y: end.y
-			}),
-			end: Shadows.CartesianPoint({
-				x: start.x,
-				y: end.y
-			}),
-		}));
-		this.walls.push(Shadows.CartesianLine({
-			start: Shadows.CartesianPoint({
-				x: start.x,
-				y: end.y
-			}),
-			end: Shadows.CartesianPoint({
-				x: start.x,
-				y: start.y
-			}),
-		}));
+		this.walls.addBox([{x: 10, y: 10}, {x: 590, y: 590}]);
 	};
 
 	App.linesToPath = function linesToPath(lines, path) {

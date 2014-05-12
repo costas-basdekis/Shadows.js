@@ -312,3 +312,23 @@ test("PolarLine", function() {
 		ok(pl1.containsAngle([testCase.angle]), "contains angle");
 	}
 });
+
+test("Walls", function() {
+	var Walls = Shadows.Walls;
+
+	ok(Walls, "Exists");
+	ok(Walls(), ".Create");
+
+	var w1 = Walls();
+
+	w1.addBox({
+		first: {x: 10, y: 10},
+		third: {x: 50, y: 50},
+	});
+
+	equal(w1.lines.length, 4, "Added a box");
+	for (var i = 0, line ; line = w1.lines[i] ; i++) {
+		var prevLine = w1.lines[(i - 1 + w1.lines.length) % w1.lines.length];
+		ok(line.start.equals([prevLine.end]));
+	}
+});
