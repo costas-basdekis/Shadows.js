@@ -130,6 +130,14 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 
 				return isAfter;
 			}),
+		isBetween: DEF(
+			['self', {n: 'before', is: ['Shadows.PolarLine']}, {n: 'after', is: ['Shadows.PolarLine']}],
+			function isBetween(self, before, after) {
+				var beforeDiff = Polar.angleDiff([before.end.angle, self.start.angle]);
+				var between = Polar.angleDiff([before.end.angle, after.start.angle]);
+
+				return Math.CILt([beforeDiff, between]);
+			}),
 	});
 
 	return obj;

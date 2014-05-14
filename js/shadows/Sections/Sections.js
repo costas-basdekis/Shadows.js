@@ -26,7 +26,6 @@ var Shadows = (function defineSectionsSections(obj) {
 			function insert(self, section) {
 				var intersects = self.intersects([section]);
 
-				self.log();
 				self.logger.log(["Intersects: %s", intersects]);
 				if (intersects) {
 					self.insertConflicts([section]);
@@ -93,10 +92,26 @@ var Shadows = (function defineSectionsSections(obj) {
 						return;
 					}
 
+					if (batchEnd < (self.sections.length - 1)) {
+						var nextSection = self.sections[batchEnd + 1];
+						if (self.isBetween([batchEndSection, nextSection])) {
+							self.logger.log(["Insert after batch @%s", batchEnd]);
+							self._insertAfter([section, batchEnd]);
+						}
+					}
+
 					batchStart = batchEnd + 1;
 				}
 
-				throw new ExceptionBase("insertNoConflicts did not insert");
+				var firstSection = self.sections[0], lastSection = batchEndSection;
+
+				if (section.isBetween([lastSection,firstSection])) {
+					self.logger.log(["Insert in the end, after @%s", self.sections.length - 1]);
+					self._insertLast([section]);
+					return;
+				}
+
+				throw new ExceptionBase("insertNoConflicts did not insert @%s".interpolate(self.center));
 			}),
 		insertConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
@@ -132,6 +147,11 @@ var Shadows = (function defineSectionsSections(obj) {
 			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
 			function _insertAfter(self, section, index) {
 				self.sections.splice(index + 1, 0, section);
+			}),
+		_insertLast: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}],
+			function _insertLast(self, section) {
+				self._insertAfter([section, self.sections.length - 1]);
 			}),
 	});
 
