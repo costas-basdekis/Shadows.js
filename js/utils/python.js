@@ -47,6 +47,17 @@ function keys(obj, butNot) {
 	return objKeys;
 }
 
+function copyObject(obj) {
+	var newObj = {};
+	var objKeys = keys(obj);
+
+	for (var i = 0, key; key = objKeys[i] ; i++) {
+		newObj[key] = obj[key];
+	}
+
+	return newObj;
+}
+
 function ExceptionBase(message, name) {
 	if (this == window) {
 		return new ExceptionBase(message, name);
@@ -167,15 +178,6 @@ DEF = (function defineDEF() {
 	function DE(defObj, message) {
 		var msg = 'def %s: %s'.interpolate(defObj.fullname, message);
 		var e = DefException(msg);
-
-		return e;
-	}
-
-	function CE(argObj, message) {
-		var msg = '%s(): %s'.interpolate(argObj.defObj.fullname, message);
-		var e = CallException(msg);
-		//Use this so that the first try-catch doesn't show an extra message
-		e.__localexception__ = True;
 
 		return e;
 	}
@@ -373,8 +375,37 @@ DEF = (function defineDEF() {
 			throw DE(defObj, 'A function was not passed');
 		}
 		defObj.funcname = defObj.func.__funcname__ || defObj.func.name;
+		defObj.curriedArgs = [];
 
 		collectArgumentDefinitions(defObj);
+	}
+
+	function DEF(namespace, argDefs, func) {
+		var defObj = {
+			argDefs: argDefs,
+			func: func,
+			namespace: namespace,
+			arguments: arguments,
+		};
+
+		makeDEF(defObj);
+
+		var decorated = curry({__funcdef__: defObj});
+
+		return decorated;
+	}
+
+	return DEF;
+})();
+
+var curry = (function defineCurry() {
+	function CE(argObj, message) {
+		var msg = '%s(): %s'.interpolate(argObj.defObj.fullname, message);
+		var e = CallException(msg);
+		//Use this so that the first try-catch doesn't show an extra message
+		e.__localexception__ = True;
+
+		return e;
 	}
 
 	function checkPased(argObj) {
@@ -406,6 +437,11 @@ DEF = (function defineDEF() {
 	}
 
 	function collectArgs(argObj) {
+		var curriedArgs = argObj.defObj.curriedArgs;
+		if (curriedArgs.length > 0) {
+			argObj.args = curriedArgs.concat(argObj.args);
+		}
+
 		//Deal with args
 		if (argObj.args.length > argObj.defObj.argNames.length) {
 			if (!argObj.defObj.allowArgs) {
@@ -510,9 +546,6 @@ DEF = (function defineDEF() {
 		}
 	}
 
-	function callFunction(argObj) {
-	}
-
 	function prepareCall(argObj) {
 		checkPased(argObj);
 		collectArgs(argObj);
@@ -577,10 +610,12 @@ DEF = (function defineDEF() {
 		return argObj.result;
 	}
 
-	function decorate(defObj) {
+	function curry(pyFunc, args) {
+		var defObj = copyObject(pyFunc.__funcdef__);
 		var func = defObj.func;
+		defObj.curriedArgs = args || [];
 
-		function pythonFunction() {
+		function __PYTHONPROXY__() {
 			var argObj = preCall(this, arguments, defObj);
 
 			try {
@@ -592,12 +627,13 @@ DEF = (function defineDEF() {
 			return postCall(argObj);
 		}
 
-		pythonFunction.__func__ = defObj.func;
+		putMetaData(defObj, __PYTHONPROXY__);
 
-		return pythonFunction;
+		return __PYTHONPROXY__;
 	}
 
 	function putMetaData(defObj, decorated) {
+		decorated.__func__ = defObj.func;
 		defObj.fullname = defObj.func.name;
 		if (defObj.namespace) {
 			defObj.fullname = '%s.%s'.interpolate(
@@ -608,23 +644,7 @@ DEF = (function defineDEF() {
 		decorated.__funcname__ = defObj.fullname;
 	}
 
-	function DEF(namespace, argDefs, func) {
-		var defObj = {
-			argDefs: argDefs,
-			func: func,
-			namespace: namespace,
-			arguments: arguments,
-		};
-
-		makeDEF(defObj);
-
-		var decorated = decorate(defObj);
-		putMetaData(defObj, decorated);
-
-		return decorated;
-	}
-
-	return DEF;
+	return curry;
 })();
 
 KeyException = DEFEXCEPTION('KeyException');
@@ -839,21 +859,24 @@ CLASS = (function defineCLASS() {
 //Method bound to an object
 METHOD = (function defineMETHOD() {
 	function bind(func, self) {
-		var selfArgs = [self];
-
-		var bound = DEF(["*", "**"],
-			function bound(args, kwargs) {
-				var allArgs = selfArgs.concat(args);
-				var result = func(allArgs, kwargs)
-
-				return result;
-			});
-
-		bound.__bound__ = 'instance';
-		bound.__func__ = func;
-		bound.__funcname__ = func.__funcname__ || func.name;
+		var bound = curry(func, [self]);
 
 		return bound;
+		// var selfArgs = [self];
+
+		// var bound = DEF(["*", "**"],
+		// 	function __INSTANCEBOUNDPROXY__(args, kwargs) {
+		// 		var allArgs = selfArgs.concat(args);
+		// 		var result = func(allArgs, kwargs)
+
+		// 		return result;
+		// 	});
+
+		// bound.__bound__ = 'instance';
+		// bound.__func__ = func;
+		// bound.__funcname__ = func.__funcname__ || func.name;
+
+		// return bound;
 	}
 
 	function METHOD(func) {
@@ -875,8 +898,8 @@ CLASSMETHOD = (function defineCLASSMETHOD() {
 		var cls = self.__class__;
 		var clsArgs = [cls];
 
-		var bound = DEF([{args: True}, {kwargs: True}],
-			function bound(args, kwargs) {
+		var bound = DEF(["*", "**"],
+			function __CLASSBOUNDPROXY__(args, kwargs) {
 				var allArgs = clsArgs.concat(args);
 				var result = func(allArgs, kwargs)
 
@@ -942,20 +965,20 @@ JS = (function defineJS() {
 //The base class of all Python classes
 object = CLASS(None, 'object', {
 	__maxuuid__: 0,
-	__init__: METHOD(DEF(['self'],
+	__init__: 
 		function __init__(self) {
 			self.__uuid__ = object.__class_def__.__maxuuid__;
 			object.__class_def__.__maxuuid__++;
-		})),
-	__copy__: METHOD(DEF(['self'],
+		},
+	__copy__: 
 		function __copy__(self) {
 			return object();
-		})),
-	__deepcopy__: METHOD(DEF(['self'],
+		},
+	__deepcopy__: 
 		function __deepcopy__(self) {
 			return self.__copy__();
-		})),
-	__getattr__: METHOD(DEF(
+		},
+	__getattr__: DEF(
 		['self', 'name', {name:'def', default:None}, {name:'cls', default:None}],
 		function __getattr__(self, name, def, cls) {
 			if (self.hasOwnProperty(name)) {
@@ -974,8 +997,8 @@ object = CLASS(None, 'object', {
 			} while (cls)
 
 			return def;
-		})),
-	__super__: METHOD(DEF(['self', {name:'cls', default:None}, {name:'name', default:None}],
+		}),
+	__super__: DEF(['self', {name:'cls', default:None}, {name:'name', default:None}],
 		function __super__(self, cls, name) {
 			if (cls === None) {
 				cls = self.__class__;
@@ -1006,9 +1029,9 @@ object = CLASS(None, 'object', {
 			}
 
 			throw KeyException('%s'.interpolate(name));
-		})),
-	toString: METHOD(DEF(['self'],
+		}),
+	toString:
 		function toString(self) {
 			return '<%s at #%s>'.interpolate(self.__class__.__name__, self.__uuid__);
-		})),
+		},
 });
