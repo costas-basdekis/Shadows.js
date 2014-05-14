@@ -349,24 +349,14 @@ test("ComputeSections", function() {
 
 	var c1 = Compute({lines: w1.lines});
 
-	var pointsInside = [
-		{x: 15, y: 15},
-		{x: 25, y: 15},
-		{x: 35, y: 15},
-		{x: 45, y: 15},
-		{x: 15, y: 25},
-		{x: 25, y: 25},
-		{x: 35, y: 25},
-		{x: 45, y: 25},
-		{x: 15, y: 35},
-		{x: 25, y: 35},
-		{x: 35, y: 35},
-		{x: 45, y: 35},
-		{x: 15, y: 45},
-		{x: 25, y: 45},
-		{x: 35, y: 45},
-		{x: 45, y: 45},
-	];
+	var pointsInside = [];
+
+	var step = 2;
+	for (var i = 10 + step ; i < 50 ; i += step) {
+		for (var j = 10 + step ; j < 50 ; j += step) {
+			pointsInside.push({x: i, y: j});
+		}
+	}
 
 	ok(c1.compute, "Compute exists");
 
@@ -375,5 +365,17 @@ test("ComputeSections", function() {
 		cp1.set(point);
 		equal(c1.compute({center: cp1}), 4, "Compute @%s".interpolate(cp1));
 		equal(c1.sections.sections.length, 4, "Has 4 sections");
+	}
+
+	var pointsOutside = [
+		{x: 5, y: 5},
+		{x: 55, y: 5},
+		{x: 5, y: 55},
+		{x: 55, y: 55},
+	];
+
+	for (var i = 0, point ; point = pointsOutside[i] ; i++) {
+		cp1.set(point);
+		equal(c1.compute({center: cp1}), 4, "Compute @%s".interpolate(cp1));
 	}
 });
