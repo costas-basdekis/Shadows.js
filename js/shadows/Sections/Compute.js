@@ -7,8 +7,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				self.lines = lines;
 				self.logger = Logger({tab: '  '});
-				self.newSections = [];
-				self.sectionsReserve = [];
+				self.newSections = Shadows.NewSections();
 				self.sections = Shadows.Sections.Sections({
 					logger: self.logger,
 				});
@@ -26,8 +25,6 @@ var Shadows = (function defineSectionsCompute(obj) {
 			['self', {n: 'center', is: ['Shadows.CartesianPoint']}],
 			function start(self, center) {
 				self.center = center;
-				self.sectionsReserve = self.sectionsReserve.concat(self.newSections);
-				self.newSections = [];
 
 				self.index = 0;
 
@@ -35,8 +32,8 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.log(['Compute at %s', self.center]);
 				self.logger.indent();
 
-				self.linesToSections();
-				self.sortSections();
+				self.newSections.fromLines([self.lines, self.center]);
+				self.newSections.sort();
 
 				self.sections.center = center;
 				self.sections.clear();
@@ -47,7 +44,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 			function step(self) {
 				self.logger.setIndent([1])
 
-				var section = self.newSections[self.index];
+				var section = self.newSections.sections[self.index];
 				self.insertSection([section]);
 
 				self.index += 1;
@@ -56,7 +53,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 			},
 		hasSteps: 
 			function hasSteps (self) {
-				return self.index < self.newSections.length;
+				return self.index < self.newSections.sections.length;
 			},
 		finish: 
 			function finish(self) {
@@ -64,45 +61,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.log(['Finish']);
 				self.logger.reset();
 
-				return self.newSections.length;
-			},
-		linesToSections: 
-			function linesToSections(self) {
-				var cl = Shadows.CartesianLine(), pl;
-
-				for (var i = 0, line ; line = self.lines[i] ; i++) {
-					cl.copyFrom([line]);
-					cl.minus([self.center]);
-					if (self.sectionsReserve.length) {
-						pl = self.sectionsReserve.pop();
-					} else {
-						pl = Shadows.PolarLine();
-					}
-					pl.fromCartesian([cl]);
-					self.newSections.push(pl);
-				}
-			},
-		sortKey: STATICMETHOD(DEF(
-			[{n: 'line', is: ['Shadows.PolarLine']}],
-			function sortKey(line) {
-				return Math.min(line.start.distance, line.end.distance);
-			})),
-		sortFunction: JS(function sortFunction(lhs, rhs) {
-				var sortKey = Shadows.Sections.Compute.__class_def__.sortKey;
-			 	var lKey = sortKey([lhs]);
-			 	var rKey = sortKey([rhs]);
-
-			 	if (lKey < rKey) {
-			 		return -1;
-			 	} else if (lKey > rKey) {
-			 		return 1;
-			 	} else {
-			 		return 0;
-			 	}
-			 }),
-		sortSections: 
-			function sortSections(self) {
-				self.newSections = self.newSections.sort(self.sortFunction);
+				return self.newSections.sections.length;
 			},
 		insertSection: DEF(
 			['self', {n:'section', is: ['Shadows.PolarLine']}],
@@ -115,10 +74,26 @@ var Shadows = (function defineSectionsCompute(obj) {
 				} else if (section.isOnPoint()) {
 					self.logger.log(['On top of point - ignore']);
 				} else {
-					self.sections.insert([section]);
+					var intersects = self.sections.intersects([section]);
+
+					self.logger.log(["Intersects: %s", intersects]);
+					if (intersects) {
+						self.insertConflicts([section]);
+					} else {
+						self.sections.insertNoConflicts([section]);
+					}
 				}
 
 				self.logger.dedent();
+			}),
+		insert: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}],
+			function insert(self, section) {
+			}),
+		insertConflicts: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}],
+			function insertConflicts(self, section) {
+
 			}),
 	});
 

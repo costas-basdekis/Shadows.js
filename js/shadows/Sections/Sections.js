@@ -21,18 +21,6 @@ var Shadows = (function defineSectionsSections(obj) {
 				self.sectionsReserve = self.sections.concat(self.sectionsReserve);
 				self.sections = [];
 			},
-		insert: DEF(
-			['self', {n: 'section', is: ['Shadows.PolarLine']}],
-			function insert(self, section) {
-				var intersects = self.intersects([section]);
-
-				self.logger.log(["Intersects: %s", intersects]);
-				if (intersects) {
-					self.insertConflicts([section]);
-				} else {
-					self.insertNoConflicts([section]);
-				}
-			}),
 		intersects: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function intersects(self, section) {
@@ -112,11 +100,6 @@ var Shadows = (function defineSectionsSections(obj) {
 				}
 
 				throw new ExceptionBase("insertNoConflicts did not insert @%s".interpolate(self.center));
-			}),
-		insertConflicts: DEF(
-			['self', {n: 'section', is: ['Shadows.PolarLine']}],
-			function insertConflicts(self, section) {
-
 			}),
 		getBatchEnd: 
 			function getBatchEnd(self, batchStart) {
