@@ -1,4 +1,5 @@
-var Shadows = (function defineSectionsSections(obj) {
+var Shadows = (function defineSectionsSections(obj, jsMath) {
+	var Math = Shadows.Math, Polar = Math.Polar;
 	var PolarLine = Shadows.PolarLine;
 
 	var SectionsModule = Shadows.Sections = Shadows.Sections || {};
@@ -114,6 +115,54 @@ var Shadows = (function defineSectionsSections(obj) {
 
 				return self.sections.length - 1;
 			},
+		getFirstInterSection: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}],
+			function getFirstIntersection(self, section) {
+				var thisAngleDiff, smallestAngleDiff = 0, sADSection = -1;
+
+				for (var i = 0, candidate ; candidate = self.sections[i] ; i++) {
+					if (candidate.containsAngleOrStart([section.start.angle])) {
+						return i;
+					}
+
+					//Find the closest to the start
+					thisAngleDiff = Polar.angleDiff([section.start.angle, candidate.start.angle]);
+					if ((sADSection == -1) ||
+						(thisAngleDiff < smallestAngleDiff)) {
+						smallestAngleDiff = thisAngleDiff;
+						sADSection = i;
+					}
+				}
+
+				return sADSection;
+			}),
+		getLastInterSection: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'firstInterSection'],
+			function getLastInterSection(self, section, firstInterSection) {
+				var thisAngleDiff, smallestAngleDiff = 0, sADSection = -1;
+
+				var i = firstInterSection, candidate;
+				do {
+					candidate = self.sections[i];
+
+					if (candidate.containsAngleOrEnd([section.end.angle])) {
+						return i;
+					}
+
+					//Find the closest to the end
+					thisAngleDiff = Polar.angleDiff([candidate.end.angle, section.end.angle]);
+					if ((sADSection == -1) ||
+						(thisAngleDiff < smallestAngleDiff)) {
+						smallestAngleDiff = thisAngleDiff;
+						sADSection = i;
+					}
+
+					i++;
+					i = i % self.sections.length;
+				} while (i != firstInterSection)
+
+				return sADSection;
+			}),
 		_insertInitial: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function _insertInitial(self, section) {
@@ -139,4 +188,4 @@ var Shadows = (function defineSectionsSections(obj) {
 	});
 
 	return obj;
-})(Shadows || {});
+})(Shadows || {}, Math);

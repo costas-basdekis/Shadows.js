@@ -93,8 +93,72 @@ var Shadows = (function defineSectionsCompute(obj) {
 		insertConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function insertConflicts(self, section) {
+				self.firstConflict = self.sections.getFirstInterSection([section]);
+				self.lastConflict = self.sections.getLastInterSection({
+					section: section,
+					firstInterSection: self.firstConflict,
+				});
+				self.logger.log(["Intersect %s-%s", self.firstConflict, self.lastConflict]);
 
+				self.headSection = null;
+				self.commonSection = Shadows.PolarLine();
+				self.compareSection = Shadows.PolarLine();
+				self.tailSection = section.__deepcopy__();
+
+
+				self.conflictIndex = self.firstConflict;
+				self.logger.indent();
+				do {
+					self.icStartOfLoop();
+
+					self.icSplitInHCT();
+				} while (!self.icEndOfLoop())
+				self.logger.dedent();
 			}),
+		icStartOfLoop: 
+			function icStartOfLoop(self) {
+				self.isEndOfLoop = self.conflictIndex == self.lastConflict;
+
+				self.logger.log(["Tail %s", self.tailSection]);
+				self.conflictSection = self.sections.sections[self.conflictIndex];
+				self.logger.log(["For #%s: %s", self.conflictIndex, self.conflictSection]);
+			},
+		icEndOfLoop:
+			function icEndOfLoop(self) {
+				return True;
+			},
+		icSplitInHCT:
+			function icSplitInHCT(self) {
+				assert(self.headSection == null, "Head section exists before splitting in HCT");
+				assert(self.tailSection, "Tail section does not exist before splitting in HCT");
+
+				self.commonSection.copyFrom([self.tailSection]);
+				self.commonSection.limitToAngles([self.conflictSection]);
+				self.compareSection.copyFrom([self.conflictSection]);
+				self.compareSection.atAngles([self.commonSection]);
+
+				var headStart = self.tailSection.start, headEnd = self.commonSection.start;
+				if (!headStart.equals([headEnd])) {
+					self.headSection = Shadows.PolarLine();
+					self.headSection.start.copyFrom([headStart]);
+					self.headSection.end.copyFrom([headEnd]);
+				}
+
+				self.tailSection.start.copyFrom([self.commonSection.end]);
+				if (self.tailSection.isEmpty()) {
+					self.tailSection = null;
+				}
+
+				self.logger.indent();
+				if (self.headSection) {
+					self.logger.log(["head %s", self.headSection]);
+				}
+				self.logger.log(["common %s", self.commonSection]);
+				if (self.tailSection) {
+					self.logger.log(["tail %s", self.tailSection]);
+				}
+				self.logger.dedent();
+			},
 	});
 
 	return obj;

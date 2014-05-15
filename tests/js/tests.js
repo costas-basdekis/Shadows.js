@@ -299,17 +299,31 @@ test("PolarLine", function() {
 	}
 
 	var containsAngleTestCases = [
-		{start: {distance: 1, angle: 0}, end: {distance: 1, angle: 1}, angle: 0.5},
-		{start: {distance: 1, angle: 1}, end: {distance: 1, angle: 2}, angle: 1.5},
-		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: 0},
-		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: -0.5},
-		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: 0.5},
+		{start: {distance: 1, angle: 0}, end: {distance: 1, angle: 1}, angle: 0.5, outside: -0.5},
+		{start: {distance: 1, angle: 1}, end: {distance: 1, angle: 2}, angle: 1.5, outside: -0.5},
+		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: 0, outside: -1.5},
+		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: -0.5, outside: -1.5},
+		{start: {distance: 1, angle: -1}, end: {distance: 1, angle: 1}, angle: 0.5, outside: -1.5},
 	];
 
 	for (var i = 0, testCase ; testCase = containsAngleTestCases[i] ; i++) {
 		pl1.start.set(testCase.start);
 		pl1.end.set(testCase.end);
-		ok(pl1.containsAngle([testCase.angle]), "contains angle");
+		ok(pl1.containsAngle([testCase.angle]), "contains angle: inside");
+		ok(pl1.containsAngleOrStart([testCase.angle]), "contains angle-or-start: inside");
+		ok(pl1.containsAngleOrEnd([testCase.angle]), "contains angle-or-end: inside");
+
+		ok(!pl1.containsAngle([testCase.start.angle]), "not contains angle: start");
+		ok(pl1.containsAngleOrStart([testCase.start.angle]), "contains angle-or-start: start");
+		ok(!pl1.containsAngleOrEnd([testCase.start.angle]), "not contains angle-or-end: start");
+
+		ok(!pl1.containsAngle([testCase.end.angle]), "not contains angle: end");
+		ok(!pl1.containsAngleOrStart([testCase.end.angle]), "not contains angle-or-start: end");
+		ok(pl1.containsAngleOrEnd([testCase.end.angle]), "contains angle-or-end: end");
+
+		ok(!pl1.containsAngle([testCase.outside]), "not contains angle: outside");
+		ok(!pl1.containsAngleOrStart([testCase.outside]), "not contains angle-or-start: outside");
+		ok(!pl1.containsAngleOrEnd([testCase.outside]), "not contains angle-or-end: outside");
 	}
 });
 
@@ -350,8 +364,7 @@ test("ComputeSections", function() {
 	var c1 = Compute({lines: w1.lines});
 
 	var pointsInside = [];
-
-	var step = 2;
+	var step = 10 //2;
 	for (var i = 10 + step ; i < 50 ; i += step) {
 		for (var j = 10 + step ; j < 50 ; j += step) {
 			pointsInside.push({x: i, y: j});
@@ -367,15 +380,70 @@ test("ComputeSections", function() {
 		equal(c1.sections.sections.length, 4, "Has 4 sections");
 	}
 
-	var pointsOutside = [
-		{x: 5, y: 5},
-		{x: 55, y: 5},
-		{x: 5, y: 55},
-		{x: 55, y: 55},
-	];
+	var pointsOutside = [];
+	var step = 10; //5;
+	for (var i = 0 ; i < 50 + step ; i += step) {
+		pointsOutside.push({x: i, y: 0});
+		pointsOutside.push({x: i, y: 55});
+		pointsOutside.push({x: 0, y: i});
+		pointsOutside.push({x: 55, y: i});
+	}
 
 	for (var i = 0, point ; point = pointsOutside[i] ; i++) {
 		cp1.set(point);
 		equal(c1.compute({center: cp1}), 4, "Compute @%s".interpolate(cp1));
+	}
+});
+
+test("PolarLineCoefs", function() {
+	var PI = Shadows.Math.Polar.HALF_CIRCLE;
+	var CartesianLine = Shadows.CartesianLine;
+	var PolarLine = Shadows.PolarLine;
+	var PolarLineCoefs = Shadows.PolarLineCoefs;
+
+	ok(PolarLineCoefs, "Exsts");
+	ok(PolarLineCoefs(), ".Create");
+
+	var cl1 = CartesianLine();
+	cl1.start.set({x: -10, y: 10});
+	cl1.end.set({x: 10, y: 10});
+
+	var pl1 = PolarLine().fromCartesian([cl1]);
+	var plc1 = PolarLineCoefs();
+
+	ok(plc1.fromLine, "fromLine exists");
+	plc1.fromLine([pl1]);
+
+	ok(plc1.atAngle, "atAngle exists");
+	equal(plc1.atAngle([PI / 2]), 10, "atAngle is correct @PI / 2");
+	equal(plc1.atAngle([PI / 4]), Math.sqrt(200), "atAngle is correct @PI / 4");
+
+	var testCases = [
+		{
+			start: {x: 10, y: 0}, end: {x: 0, y: 10},
+			tests: [
+				{angle: 0, distance: 10},
+				{angle: PI / 2, distance: 10},
+				{angle: PI / 4, distance: Math.sqrt(50)},
+			],
+		},
+		{
+			start: {x: 10, y: 10}, end: {x: 10, y: -10},
+			tests: [
+				{angle: 0, distance: 10},
+				{angle: PI / 4, distance: Math.sqrt(200)},
+				{angle: -PI / 4, distance: Math.sqrt(200)},
+			],
+		},
+	];
+
+	for (var i = 0, testCase ; testCase = testCases[i] ; i++) {
+		cl1.start.set(testCase.start);
+		cl1.end.set(testCase.end);
+		pl1.fromCartesian([cl1]);
+		plc1.fromLine([pl1]);
+		for (var j = 0, test ; test = testCase.tests[j] ; j++) {
+			equal(plc1.atAngle([test.angle]), test.distance, "[%s].atAngle is correct @[%s]".interpolate(i, j));
+		}
 	}
 });

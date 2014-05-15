@@ -58,6 +58,14 @@ var Shadows = (function definePolarPoint(obj) {
 
 				return str;
 			},
+		interpolateLine: DEF(
+			['self', {n: 'line', is: ['Shadows.PolarLine']}, 'angle'],
+			function interpolateLine(self, line, angle) {
+				self.angle = angle;
+				self.distance = line.interpolate([angle]);
+
+				return self;
+			}),
 	});
 
 	return obj;

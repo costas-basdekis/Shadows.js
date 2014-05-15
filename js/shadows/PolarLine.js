@@ -25,6 +25,14 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 					end: self.end.__deepcopy__(),
 				});
 			},
+		copyFrom: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLine']}],
+			function copyFrom(self, other) {
+				self.start.copyFrom([other.start]);
+				self.end.copyFrom([other.end]);
+
+				return self;
+			}),
 		fromCartesian: DEF(
 			['self', {n: 'other', is: ['Shadows.CartesianLine']}],
 			function fromCartesian(self, other) {
@@ -96,6 +104,28 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				return Math.CILt([0, startDiff]) &&
 					   Math.CILt([startDiff, sectionLength]);
 			},
+		containsAngleOrStart: 
+			function containsAngleOrStart(self, angle) {
+				var startDiff, sectionLength;
+
+				startDiff = Polar.angleDiff([self.start.angle, angle]);
+				sectionLength = Polar.angleDiff([self.start.angle,
+												 self.end.angle]);
+
+				return Math.CILEq([0, startDiff]) &&
+					   Math.CILt([startDiff, sectionLength]);
+			},
+		containsAngleOrEnd: 
+			function containsAngleOrEnd(self, angle) {
+				var startDiff, sectionLength;
+
+				startDiff = Polar.angleDiff([self.start.angle, angle]);
+				sectionLength = Polar.angleDiff([self.start.angle,
+												 self.end.angle]);
+
+				return Math.CILt([0, startDiff]) &&
+					   Math.CILEq([startDiff, sectionLength]);
+			},
 		hasSameRange: DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}],
 			function hasSameRange(self, other) {
@@ -137,6 +167,33 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				var between = Polar.angleDiff([before.end.angle, after.start.angle]);
 
 				return Math.CILt([beforeDiff, between]);
+			}),
+		interpolate: 
+			function interpolate(self, angle) {
+				var coefs = Shadows.PolarLineCoefs();
+				coefs.fromLine([self]);
+
+				return coefs.atAngle([angle]);
+			},
+		limitToAngles: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLine']}],
+			function limitToAngles(self, other) {
+				if (self.containsAngleOrStart([other.start.angle])) {
+					self.start.interpolateLine([self, other.start.angle]);
+				}
+				if (self.containsAngleOrEnd([other.end.angle])) {
+					self.end.interpolateLine([self, other.end.angle]);
+				}
+
+				return self;
+			}),
+		atAngles: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLine']}],
+			function atAngles(self, other) {
+				self.start.interpolateLine([self, other.start.angle]);
+				self.end.interpolateLine([self, other.end.angle]);
+
+				return self;
 			}),
 	});
 
