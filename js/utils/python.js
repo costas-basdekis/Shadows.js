@@ -16,6 +16,11 @@ function isFunction(obj) {
   return !!(obj && obj.constructor && obj.call && obj.apply);
 }
 
+function equalsNaN(obj) {
+	return typeof result === "NaN" || 
+		  (typeof result === "number" && isNaN(result));
+}
+
 //This is not the Python bool: [] and {} are true
 function bool(obj) {
 	return !!obj;
@@ -154,6 +159,14 @@ String.prototype.interpolate = (function defineInterpolate() {
 
 	return interpolate;
 })();
+
+AssertException = DEFEXCEPTION('AssertException', PythonException);
+
+function assert(condition, message) {
+	if (!condition) {
+		throw "Assert failed: %s".interpolate(message);
+	}
+}
 
 DefException = DEFEXCEPTION('DefException', PythonException);
 CallException = DEFEXCEPTION('CallException', PythonException);
@@ -400,7 +413,7 @@ DEF = (function defineDEF() {
 
 var curry = (function defineCurry() {
 	function CE(argObj, message) {
-		var msg = '%s(): %s'.interpolate(argObj.defObj.fullname, message);
+		var msg = 'calling %s(): %s'.interpolate(argObj.defObj.fullname, message);
 		var e = CallException(msg);
 		//Use this so that the first try-catch doesn't show an extra message
 		e.__localexception__ = True;
@@ -607,6 +620,12 @@ var curry = (function defineCurry() {
 			throw argObj.exception;
 		}
 
+		var result = argObj.result;
+
+		if (equalsNaN(result) || typeof result === Infinity) {
+			throw CE(argObj, "Unacceptable result type: %s".interpolate(argObj.result));
+		}
+
 		return argObj.result;
 	}
 
@@ -616,9 +635,9 @@ var curry = (function defineCurry() {
 		defObj.curriedArgs = args || [];
 
 		function __PYTHONPROXY__() {
-			var argObj = preCall(this, arguments, defObj);
-
+			var argObj = {defObj: defObj};
 			try {
+				argObj = preCall(this, arguments, defObj);
 				argObj.result = func.apply(argObj.this, argObj.callArguments);
 			} catch (e) {
 				argObj.exception = e;
