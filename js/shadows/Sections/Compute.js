@@ -115,6 +115,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 					self.icSplitInHCT();
 					self.icDetermineVisibility();
+					self.icDealWithHead();
 
 					self.logger.dedent();
 				} while (!self.icEndOfLoop())
@@ -173,6 +174,44 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.log(["compare to %s, visibility[%s,%s]", 
 					self.compareSection, self.startIsVisible, self.endIsVisible]);
 			},
+		icDealWithHead:
+			function icDealWithHead(self) {
+				if (!self.headSection) {
+					return;
+				}
+
+				if (!self.startIsVisible) {
+					self.logger.log(["Insert head"]);
+					self.icInsertBefore([self.headSection]);
+				} else {
+					self.commonSection.start.copyFrom([self.headSection.start]);
+					self.logger.log(["Join with head, now %s", self.commonSection]);
+				}
+
+				self.headSection = null;
+			},
+		icInsertBefore: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}],
+			function icInsertBefore(self, section) {
+				self.logger.indent();
+
+				self.logger.log(["Add before %s: %s", self.conflictIndex, section]);
+				self.sections._insertBefore({section: section, index: self.conflictIndex});
+
+				if (self.firstConflict >= index) {
+					self.firstConflict++;
+				}
+				if (self.lastConflict >= index) {
+					self.lastConflict++;
+				}
+				if (self.conflictIndex >= index) {
+					self.conflictIndex++;
+				}
+				self.logger.log(["New intersect: %s-%s @%s",
+					self.firstConflict, self.lastConflict, self.conflictIndex]);
+
+				self.logger.dedent();
+			}),
 	});
 
 	return obj;
