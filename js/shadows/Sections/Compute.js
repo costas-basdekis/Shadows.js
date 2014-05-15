@@ -111,7 +111,12 @@ var Shadows = (function defineSectionsCompute(obj) {
 				do {
 					self.icStartOfLoop();
 
+					self.logger.indent();
+
 					self.icSplitInHCT();
+					self.icDetermineVisibility();
+
+					self.logger.dedent();
 				} while (!self.icEndOfLoop())
 				self.logger.dedent();
 			}),
@@ -149,7 +154,6 @@ var Shadows = (function defineSectionsCompute(obj) {
 					self.tailSection = null;
 				}
 
-				self.logger.indent();
 				if (self.headSection) {
 					self.logger.log(["head %s", self.headSection]);
 				}
@@ -157,7 +161,17 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.tailSection) {
 					self.logger.log(["tail %s", self.tailSection]);
 				}
-				self.logger.dedent();
+			},
+		icDetermineVisibility:
+			function icDetermineVisibility(self) {
+				var visibility = self.conflictSection.visibility([
+					self.commonSection, self.compareSection]);
+
+				self.startIsVisible = visibility.startIsVisible;
+				self.endIsVisible = visibility.endIsVisible;
+
+				self.logger.log(["compare to %s, visibility[%s,%s]", 
+					self.compareSection, self.startIsVisible, self.endIsVisible]);
 			},
 	});
 

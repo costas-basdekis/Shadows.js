@@ -195,6 +195,34 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 
 				return self;
 			}),
+		visibility: DEF(
+			['self', {n: 'commonSection', is: ['Shadows.PolarLine']}, 
+					 {n: 'compareSection', is: ['Shadows.PolarLine']}],
+			function visibility(self, commonSection, compareSection) {
+				//We don't compare using math, as it doesn't make a difference
+				var startIsVisible = commonSection.start.distance < compareSection.start.distance,
+					endIsVisible = commonSection.end.distance < compareSection.end.distance;
+
+				//Make sure they are not only visible/hidden in the edge
+				if (startIsVisible && !endIsVisible) {
+					if (commonSection.start.equals([self.start])) {
+						startIsVisible = False;
+					} else {
+						endIsVisible = True;
+					}
+				} else if (!startIsVisible && endIsVisible) {
+					if (commonSection.end.equals([self.end])) {
+						endIsVisible = False;
+					} else {
+						startIsVisible = True;
+					}
+				}
+
+				return {
+					startIsVisible: startIsVisible,
+					endIsVisible: endIsVisible,
+				};
+			}),
 	});
 
 	return obj;
