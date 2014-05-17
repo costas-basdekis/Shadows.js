@@ -133,6 +133,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 		icStartOfLoop: 
 			function icStartOfLoop(self) {
 				self.isEndOfLoop = self.conflictIndex == self.lastConflict;
+				self.logger.log(["End of loop: %s", self.isEndOfLoop]);
 
 				self.logger.log(["Tail %s", self.tailSection]);
 				self.conflictSection = self.sections.sections[self.conflictIndex];
@@ -140,11 +141,11 @@ var Shadows = (function defineSectionsCompute(obj) {
 			},
 		icEndOfLoop:
 			function icEndOfLoop(self) {
-				if (self.icEndOfLoop) {
+				if (self.isEndOfLoop) {
 					return True;
 				}
 
-				self.conflictIndex = (self.conflictIndex + 1) % self.sections.sections.count;
+				self.conflictIndex = (self.conflictIndex + 1) % self.sections.sections.length;
 
 				return False;
 			},
