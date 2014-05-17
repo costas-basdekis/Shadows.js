@@ -126,6 +126,9 @@ var Shadows = (function defineSectionsCompute(obj) {
 					self.logger.dedent();
 				} while (!self.icEndOfLoop())
 				self.logger.dedent();
+
+				assert(!self.headSection, "No head at the end of the loop");
+				self.icInsertLastTail();
 			}),
 		icStartOfLoop: 
 			function icStartOfLoop(self) {
@@ -268,6 +271,15 @@ var Shadows = (function defineSectionsCompute(obj) {
 					}
 				}
 			},
+		icInsertLastTail:
+			function icInsertLastTail(self) {
+				if (!self.tailSection) {
+					return;
+				}
+
+				self.logger.log(["Final tail %s, insert at end", self.tailSection]);
+				self.icInsertAfter([self.tailSection, self.conflictIndex]);
+			},
 		//Sections management
 		logNewIntersect:
 			function logNewIntersect(self) {
@@ -291,6 +303,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex >= index) {
 					self.conflictIndex++;
 				}
+				self.conflictSection = self.sections.sections[self.conflictIndex];
 				self.logNewIntersect();
 
 				self.logger.dedent();
@@ -312,6 +325,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex > index) {
 					self.conflictIndex++;
 				}
+				self.conflictSection = self.sections.sections[self.conflictIndex];
 				self.logNewIntersect();
 
 				self.logger.dedent();
@@ -362,6 +376,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex >= index) {
 					self.conflictIndex--;
 				}
+				self.conflictSection = self.sections.sections[self.conflictIndex];
 				self.logNewIntersect();
 
 				self.logger.dedent();
