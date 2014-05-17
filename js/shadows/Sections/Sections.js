@@ -185,6 +185,10 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 			function _insertLast(self, section) {
 				self._insertAfter([section, self.sections.length - 1]);
 			}),
+		_remove: 
+			function _remove(self, index) {
+				self.sections.splice(index, 1);
+			},
 	});
 
 	return obj;

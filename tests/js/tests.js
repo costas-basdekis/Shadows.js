@@ -355,6 +355,69 @@ test("PolarLine", function() {
 		ok(Shadows.Math.CIEq([cp1.x, testCase.intersection.x]), "Intersection x is correct: %s == %s".interpolate(cp1.x, testCase.intersection.x));
 		ok(Shadows.Math.CIEq([cp1.y, testCase.intersection.y]), "Intersection y is correct: %s == %s".interpolate(cp1.y, testCase.intersection.y));
 	}
+
+	ok(pl1.containsSection, "containsSection exists");
+	ok(pl1.containsSectionInclusive, "containsSectionInclusive exists");
+
+	var testCases = [
+		{
+			start: -1, end: 1,
+			contains: [
+				{start: -0.5, end: 0.5},
+				{start: 0, end: 0.5},
+				{start: -0.5, end: 0},
+			],
+			containsInclusive: [
+				{start: -1, end: 1},
+				{start: 0, end: 1},
+				{start: -1, end: 0},
+			],
+			intersect: [
+				{start: -2, end: 1},
+				{start: 1, end: -2},
+				{start: -2, end: 0},
+				{start: 0, end: 2},
+				{start: -2, end: 2},
+			],
+			outside: [
+				{start: -3, end: -2},
+				{start: 2, end: 3},
+				{start: 3, end: -3},
+			],
+		},
+	];
+
+	var pl1 = Shadows.PolarLine(), pl2 = Shadows.PolarLine();
+	for (var i = 0, testCase ; testCase = testCases[i] ; i++) {
+		pl1.start.set({angle: testCase.start, distance: 1});
+		pl1.end.set({angle: testCase.end, distance: 1});
+		for (var distance2 = 0.5 ; distance2 <= 1.5 ; distance2 += 0.5) {
+			for (var j = 0, testSection ; testSection = testCase.contains[j] ; j++) {
+				pl2.start.set({angle: testSection.start, distance: distance2});
+				pl2.end.set({angle: testSection.end, distance: distance2});
+				ok(pl1.containsSection([pl2]), "Contains contained");
+				ok(pl1.containsSectionInclusive([pl2]), "Contains inclusive contained");
+			}
+			for (var j = 0, testSection ; testSection = testCase.containsInclusive[j] ; j++) {
+				pl2.start.set({angle: testSection.start, distance: distance2});
+				pl2.end.set({angle: testSection.end, distance: distance2});
+				ok(!pl1.containsSection([pl2]), "Not contains contained inclusive");
+				ok(pl1.containsSectionInclusive([pl2]), "Contains inclusive contained inclusive");
+			}
+			for (var j = 0, testSection ; testSection = testCase.intersect[j] ; j++) {
+				pl2.start.set({angle: testSection.start, distance: distance2});
+				pl2.end.set({angle: testSection.end, distance: distance2});
+				ok(!pl1.containsSection([pl2]), "Not contains intersect");
+				ok(!pl1.containsSectionInclusive([pl2]), "Not contains inclusive intersect");
+			}
+			for (var j = 0, testSection ; testSection = testCase.outside[j] ; j++) {
+				pl2.start.set({angle: testSection.start, distance: distance2});
+				pl2.end.set({angle: testSection.end, distance: distance2});
+				ok(!pl1.containsSection([pl2]), "Not contains outside");
+				ok(!pl1.containsSectionInclusive([pl2]), "Not contains inclusive outside");
+			}
+		}
+	}
 });
 
 test("Walls", function() {

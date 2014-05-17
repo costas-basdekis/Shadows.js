@@ -118,6 +118,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 					self.icDealWithHead();
 					if (self.isVisible) {
 						self.icShortenCommonSection();
+						self.icInsertCommonSection();
 					} else {
 						self.logger.log(["Discard - it's hidden"]);
 					}
@@ -136,7 +137,13 @@ var Shadows = (function defineSectionsCompute(obj) {
 			},
 		icEndOfLoop:
 			function icEndOfLoop(self) {
-				return True;
+				if (self.icEndOfLoop) {
+					return True;
+				}
+
+				self.conflictIndex = (self.conflictIndex + 1) % self.sections.sections.count;
+
+				return False;
 			},
 		icSplitInHCT:
 			function icSplitInHCT(self) {
@@ -188,7 +195,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				if (!self.startIsVisible) {
 					self.logger.log(["Insert head"]);
-					self.icInsertBefore([self.headSection]);
+					self.icInsertBefore([self.headSection, self.conflictIndex]);
 				} else {
 					self.commonSection.start.copyFrom([self.headSection.start]);
 					self.logger.log(["Join with head, now %s", self.commonSection]);
@@ -211,13 +218,69 @@ var Shadows = (function defineSectionsCompute(obj) {
 				}
 				self.logger.log(["Shorten common, now: %s", self.commonSection]);
 			},
+		icInsertCommonSection:
+			function icInsertCommonSection(self) {
+				var commonSection = self.commonSection;
+				var conflictSection = self.conflictSection;
+
+				if (commonSection.isEmpty()) {
+					self.logger.log(["Too small - discard"]);
+				} else if (commonSection.containsSectionInclusive([conflictSection])) {
+					self.logger.log(["Common contains conflict"]);
+
+					//It contains the section - remove it
+					self.icRemoveSection([self.conflictIndex]);
+					//Everything is tail now
+					if (self.tailSection) {
+						self.tailSection.start.copyFrom([self.commonSection.start]);
+					} else {
+						self.tailSection = self.commonSection.__deepcopy__();
+					}
+				} else if (conflictSection.containsSection([commonSection])) {
+					self.logger.log(["Conflict contains common"]);
+
+					//Conflict contains it - it gets split
+					self.icInsertSplit([commonSection, self.conflictIndex]);
+				} else {
+					//Covers only the start or the end of the section
+					if (self.conflictSection.containsAngle([self.commonSection.end.angle])) {
+						//Shorten section
+						self.conflictSection.start.interpolateLine([
+							self.conflictSection, self.commonSection.end.angle]);
+						self.logger.log(["Shorten start of %s: now %s", self.conflictIndex, self.conflictSection]);
+						self.logger.log(["Common before conflict"]);
+						//Add before
+						self.icInsertBefore([self.commonSection, self.conflictIndex]);
+					} else {
+						assert(self.conflictSection.containsAngleInclusive([self.commonSection.start.angle]),
+							"Common covers only the start or the end of the conflict");
+						//Shorten Section
+						self.conflictSection.end.interpolateLine([
+							self.conflictSection, self.commonSection.start.angle]);
+						self.logger.log(["Shorten end of %s: now %s", self.conflictIndex, self.conflictSection]);
+						//Append to tail
+						if (self.tailSection) {
+							self.tailSection.start.copyFrom([self.commonSection.start]);
+						} else {
+							self.tailSection = self.commonSection.__deepcopy__();
+						}
+						self.logger.log(["Common after conflict"]);
+					}
+				}
+			},
+		//Sections management
+		logNewIntersect:
+			function logNewIntersect(self) {
+				self.logger.log(["New intersect: %s,%s @%s",
+					self.firstConflict, self.lastConflict, self.conflictIndex]);
+			},
 		icInsertBefore: DEF(
-			['self', {n: 'section', is: ['Shadows.PolarLine']}],
-			function icInsertBefore(self, section) {
+			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
+			function icInsertBefore(self, section, index) {
 				self.logger.indent();
 
-				self.logger.log(["Add before %s: %s", self.conflictIndex, section]);
-				self.sections._insertBefore({section: section, index: self.conflictIndex});
+				self.logger.log(["Add before %s: %s", index, section]);
+				self.sections._insertBefore({section: section, index: index});
 
 				if (self.firstConflict >= index) {
 					self.firstConflict++;
@@ -228,11 +291,81 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex >= index) {
 					self.conflictIndex++;
 				}
-				self.logger.log(["New intersect: %s-%s @%s",
-					self.firstConflict, self.lastConflict, self.conflictIndex]);
+				self.logNewIntersect();
 
 				self.logger.dedent();
 			}),
+		icInsertAfter: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
+			function icInsertAfter(self, section, index) {
+				self.logger.indent();
+
+				self.logger.log(["Add after %s: %s", self.conflictIndex, section]);
+				self.sections._insertAfter({section: section, index: index});
+
+				if (self.firstConflict > index) {
+					self.firstConflict++;
+				}
+				if (self.lastConflict > index) {
+					self.lastConflict++;
+				}
+				if (self.conflictIndex > index) {
+					self.conflictIndex++;
+				}
+				self.logNewIntersect();
+
+				self.logger.dedent();
+			}),
+		icInsertSplit: DEF(
+			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
+			function icInsertSplit(self, section, index) {
+				self.logger.indent();
+
+				assert(self.isEndOfLoop, "InsertSplit only on end of loop");
+
+				self.logger.log(["Insert & split %s: %s", index, section]);
+
+				//First split
+				var splitSection = self.sections[index];
+				var secondPart = Shadows.PolarLine({
+					start: self.compareSection.end.__copy__(),
+					end: splitSection.end.__copy__(),
+				});
+
+				//Then shorten
+				splitSection.end.copyFrom([self.compareSection.start]);
+
+				//Add second part
+				self.icInsertAfter([secondPart, index]);
+
+				//Finaly, add section
+				self.icInsertAfter([section, index]);
+
+				self.logger.dedent();
+			}),
+		icRemoveSection:
+			function icRemoveSection(self, index) {
+				self.logger.indent();
+
+				var section = self.sections.sections[index];
+				self.logger.log(["Remove section %s: %s", index, section]);
+				self.sections._remove([index]);
+
+				//Only decrement later ones
+				//Note the difference in the ineq signs
+				if (self.firstConflict > index) {
+					self.firstConflict--;
+				}
+				if (self.lastConflict >= index) {
+					self.lastConflict--;
+				}
+				if (self.conflictIndex >= index) {
+					self.conflictIndex--;
+				}
+				self.logNewIntersect();
+
+				self.logger.dedent();
+			},
 	});
 
 	return obj;

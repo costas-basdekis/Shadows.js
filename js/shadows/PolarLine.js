@@ -137,6 +137,18 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				return Math.CILt([0, startDiff]) &&
 					   Math.CILEq([startDiff, sectionLength]);
 			},
+		containsSection: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLine']}],
+			function containsSection(self, other) {
+				return self.containsAngle([other.start.angle]) &&
+					   self.containsAngle([other.end.angle]);
+			}),
+		containsSectionInclusive: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLine']}],
+			function containsSectionInclusive(self, other) {
+				return self.containsAngleInclusive([other.start.angle]) &&
+					   self.containsAngleInclusive([other.end.angle]);
+			}),
 		hasSameRange: DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}],
 			function hasSameRange(self, other) {
