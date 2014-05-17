@@ -17,8 +17,8 @@ function isFunction(obj) {
 }
 
 function equalsNaN(obj) {
-	return typeof result === "NaN" || 
-		  (typeof result === "number" && isNaN(result));
+	return typeof obj === "NaN" || 
+		  (typeof obj === "number" && isNaN(obj));
 }
 
 //This is not the Python bool: [] and {} are true
@@ -881,21 +881,6 @@ METHOD = (function defineMETHOD() {
 		var bound = curry(func, [self]);
 
 		return bound;
-		// var selfArgs = [self];
-
-		// var bound = DEF(["*", "**"],
-		// 	function __INSTANCEBOUNDPROXY__(args, kwargs) {
-		// 		var allArgs = selfArgs.concat(args);
-		// 		var result = func(allArgs, kwargs)
-
-		// 		return result;
-		// 	});
-
-		// bound.__bound__ = 'instance';
-		// bound.__func__ = func;
-		// bound.__funcname__ = func.__funcname__ || func.name;
-
-		// return bound;
 	}
 
 	function METHOD(func) {
