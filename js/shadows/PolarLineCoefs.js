@@ -13,6 +13,8 @@ var Shadows = (function definePolarLineCoefs(obj, jsMath) {
 
 				self.coCos = solution.x;
 				self.coSin = solution.y;
+
+				return self;
 			}),
 		getCoefs: DEF(
 			['self', {n: 'line', is: ['Shadows.PolarLine']}],
@@ -35,6 +37,30 @@ var Shadows = (function definePolarLineCoefs(obj, jsMath) {
 				return 1 / (self.coCos * jsMath.cos(angle) + 
 							self.coSin * jsMath.sin(angle));
 			},
+		intersectingAngle: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLineCoefs']}],
+			function offset(self, other) {
+				var coCos = self.coCos - other.coCos,
+					coSin = other.coSin - self.coSin;
+				var angle;
+
+				if (coSin != 0) {
+					angle = jsMath.atan(coCos / coSin);
+				} else {
+					angle = 0;
+				}
+
+				var distance = self.atAngle([angle]);
+
+				if (Math.CILt([distance, 0]) ||
+					Math.CIEq([1 / distance, 0])) {
+					angle += Polar.HALF_CIRCLE;
+				}
+
+				angle = Polar.proper([angle]);
+
+				return angle;
+			}),
 	});
 
 	return obj;

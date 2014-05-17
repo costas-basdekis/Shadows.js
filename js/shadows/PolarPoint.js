@@ -25,7 +25,7 @@ var Shadows = (function definePolarPoint(obj) {
 				return self;
 			}),
 		set: 
-			function (self, angle, distance) {
+			function set(self, angle, distance) {
 				self.angle = angle;
 				self.distance = distance;
 			},

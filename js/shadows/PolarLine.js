@@ -104,6 +104,17 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				return Math.CILt([0, startDiff]) &&
 					   Math.CILt([startDiff, sectionLength]);
 			},
+		containsAngleInclusive:
+			function containsAngle(self, angle) {
+				var startDiff, sectionLength;
+
+				startDiff = Polar.angleDiff([self.start.angle, angle]);
+				sectionLength = Polar.angleDiff([self.start.angle,
+												 self.end.angle]);
+
+				return Math.CILEq([0, startDiff]) &&
+					   Math.CILEq([startDiff, sectionLength]);
+			},
 		containsAngleOrStart: 
 			function containsAngleOrStart(self, angle) {
 				var startDiff, sectionLength;
@@ -222,6 +233,24 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 					startIsVisible: startIsVisible,
 					endIsVisible: endIsVisible,
 				};
+			}),
+		intersect: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarLine']}],
+			function intersect(self, other) {
+				var intersection = Shadows.PolarPoint();
+				var coefsLhs, coefsRhs, coefsDiff;
+
+				coefsLhs = Shadows.PolarLineCoefs().fromLine([self]);
+				coefsRhs = Shadows.PolarLineCoefs().fromLine([other]);
+				
+				intersection.angle = coefsLhs.intersectingAngle([coefsRhs]);
+
+				assert(self.containsAngleInclusive([intersection.angle]), "Intersection is contained");
+				assert(other.containsAngleInclusive([intersection.angle]), "Intersection is contained");
+
+				intersection.distance = self.interpolate([intersection.angle]);
+
+				return intersection;
 			}),
 	});
 

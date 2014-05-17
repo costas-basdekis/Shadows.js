@@ -116,6 +116,11 @@ var Shadows = (function defineSectionsCompute(obj) {
 					self.icSplitInHCT();
 					self.icDetermineVisibility();
 					self.icDealWithHead();
+					if (self.isVisible) {
+						self.icShortenCommonSection();
+					} else {
+						self.logger.log(["Discard - it's hidden"]);
+					}
 
 					self.logger.dedent();
 				} while (!self.icEndOfLoop())
@@ -170,6 +175,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				self.startIsVisible = visibility.startIsVisible;
 				self.endIsVisible = visibility.endIsVisible;
+				self.isVisible = self.startIsVisible || self.endIsVisible;
 
 				self.logger.log(["compare to %s, visibility[%s,%s]", 
 					self.compareSection, self.startIsVisible, self.endIsVisible]);
@@ -189,6 +195,21 @@ var Shadows = (function defineSectionsCompute(obj) {
 				}
 
 				self.headSection = null;
+			},
+		icShortenCommonSection:
+			function icShortenCommonSection(self) {
+				if (self.startIsVisible && self.endIsVisible) {
+					return;
+				}
+
+				var commonPoint = self.commonSection.intersect([self.conflictSection]);
+
+				if (!self.startIsVisible) {
+					self.commonSection.start.copyFrom([commonPoint]);
+				} else {
+					self.commonSection.end.copyFrom([commonPoint]);
+				}
+				self.logger.log(["Shorten common, now: %s", self.commonSection]);
 			},
 		icInsertBefore: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],

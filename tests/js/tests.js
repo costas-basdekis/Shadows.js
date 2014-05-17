@@ -310,20 +310,50 @@ test("PolarLine", function() {
 		pl1.start.set(testCase.start);
 		pl1.end.set(testCase.end);
 		ok(pl1.containsAngle([testCase.angle]), "contains angle: inside");
+		ok(pl1.containsAngleInclusive([testCase.angle]), "contains angle inclusive: inside");
 		ok(pl1.containsAngleOrStart([testCase.angle]), "contains angle-or-start: inside");
 		ok(pl1.containsAngleOrEnd([testCase.angle]), "contains angle-or-end: inside");
 
 		ok(!pl1.containsAngle([testCase.start.angle]), "not contains angle: start");
+		ok(pl1.containsAngleInclusive([testCase.start.angle]), "contains angle inclusive: start");
 		ok(pl1.containsAngleOrStart([testCase.start.angle]), "contains angle-or-start: start");
 		ok(!pl1.containsAngleOrEnd([testCase.start.angle]), "not contains angle-or-end: start");
 
 		ok(!pl1.containsAngle([testCase.end.angle]), "not contains angle: end");
+		ok(pl1.containsAngleInclusive([testCase.end.angle]), "contains angle inclusive: end");
 		ok(!pl1.containsAngleOrStart([testCase.end.angle]), "not contains angle-or-start: end");
 		ok(pl1.containsAngleOrEnd([testCase.end.angle]), "contains angle-or-end: end");
 
 		ok(!pl1.containsAngle([testCase.outside]), "not contains angle: outside");
+		ok(!pl1.containsAngleInclusive([testCase.outside]), "not contains angle inclusive: outside");
 		ok(!pl1.containsAngleOrStart([testCase.outside]), "not contains angle-or-start: outside");
 		ok(!pl1.containsAngleOrEnd([testCase.outside]), "not contains angle-or-end: outside");
+	}
+
+	ok(pl1.intersect, "intersect exists");
+
+	var testCases = [
+		{a: {start: {x: -2, y: 2}, end: {x: 2, y: 0}},
+		 b: {start: {x: -1, y: 1}, end: {x: 1, y: 1}},
+		 intersection: {x: 0, y: 1}},
+		{a: {start: {x: 0, y: 2}, end: {x: 2, y: 0}},
+		 b: {start: {x: 0, y: 1}, end: {x: 2, y: 1}},
+		 intersection: {x: 1, y: 1}},
+	];
+
+	var cl1 = Shadows.CartesianLine(), cl2 = Shadows.CartesianLine(), cp1 = Shadows.CartesianPoint();
+	var pl1 = Shadows.PolarLine(), pl2 = Shadows.PolarLine(), intersection;
+	for (var i = 0, testCase ; testCase = testCases[i] ; i++) {
+		cl1.start.set(testCase.a.start);
+		cl1.end.set(testCase.a.end);
+		cl2.start.set(testCase.b.start);
+		cl2.end.set(testCase.b.end);
+		pl1.fromCartesian([cl1]);
+		pl2.fromCartesian([cl2]);
+		intersection = pl1.intersect([pl2]);
+		cp1.fromPolar([intersection]);
+		ok(Shadows.Math.CIEq([cp1.x, testCase.intersection.x]), "Intersection x is correct: %s == %s".interpolate(cp1.x, testCase.intersection.x));
+		ok(Shadows.Math.CIEq([cp1.y, testCase.intersection.y]), "Intersection y is correct: %s == %s".interpolate(cp1.y, testCase.intersection.y));
 	}
 });
 
