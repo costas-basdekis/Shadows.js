@@ -1,6 +1,7 @@
 var Shadows = (function definePolarLine(obj, jsMath) {
 	var Math = Shadows.Math, Polar = Math.Polar;
 	var PolarLine = obj.PolarLine = CLASS('Shadows.PolarLine', {
+		toStringCenter: Shadows.CartesianPoint(),
 		__init__: DEF(
 			['self', 
 			 {n: 'start', dd: Shadows.PolarPoint, is: [Shadows.PolarPoint]},
@@ -52,7 +53,9 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 			},
 		toString: 
 			function toString(self) {
-				var str = 'Polar %s - %s'.interpolate(self.start, self.end);
+				var center = Shadows.PolarLine.__class_def__.toStringCenter;
+				var cartesian = self.toCartesian().plus([center]);
+				var str = 'P{%s, %s}, C{%s}'.interpolate(self.start, self.end, cartesian);
 
 				return str;
 			},

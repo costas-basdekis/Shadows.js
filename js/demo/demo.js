@@ -13,6 +13,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		this.initPaper();
 		this.initWalls();
 		this.initShadows();
+		this.initCompute();
 		this.initMouse()
 		this.redraw();
 		this.stepByStep.init();
@@ -44,6 +45,13 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App.initShadows = function initShadows() {
 		this.createShadows();
 	}
+
+	App.initCompute = function initCompute() {
+		var computeSections = App.computeSections = Shadows.Sections.Compute({
+			lines: App.walls.lines,
+		});
+		Shadows.PolarLine.__class_def__.toStringCenter = computeSections.center;
+	};
 
 	App.initMouse = function initMouse() {
 		this.Tools.MoveCenter.init();

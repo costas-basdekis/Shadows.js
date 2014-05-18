@@ -11,6 +11,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.sections = Shadows.Sections.Sections({
 					logger: self.logger,
 				});
+				self.center = Shadows.CartesianPoint();
 			},
 		getSection:
 			function getSection(self, index) {
@@ -28,11 +29,12 @@ var Shadows = (function defineSectionsCompute(obj) {
 		start: DEF(
 			['self', {n: 'center', is: ['Shadows.CartesianPoint']}],
 			function start(self, center) {
-				self.center = center;
+				self.center.copyFrom([center]);
 
 				self.index = 0;
 
 				self.logger.reset();
+				self.logger.begin();
 				self.logger.log(['Compute at %s', self.center]);
 				self.logger.indent();
 
@@ -64,6 +66,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.setIndent([1])
 				self.logger.log(['Finish']);
 				self.logger.reset();
+				self.logger.end();
 
 				return self.newSections.sections.length;
 			},
@@ -89,10 +92,6 @@ var Shadows = (function defineSectionsCompute(obj) {
 				}
 
 				self.logger.dedent();
-			}),
-		insert: DEF(
-			['self', {n: 'section', is: ['Shadows.PolarLine']}],
-			function insert(self, section) {
 			}),
 		insertConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],

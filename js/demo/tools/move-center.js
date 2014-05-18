@@ -10,10 +10,6 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		var path = App.paper.centerPath = new _.Path.Circle({x: 50, y: 50}, 15);
 		path.strokeColor = 'black';
 		path.fillColor = 'black';
-
-		var computeSections = App.computeSections = Shadows.Sections.Compute({
-			lines: App.walls.lines,
-		});
 	};
 
 	Tool.onMouseDown =
