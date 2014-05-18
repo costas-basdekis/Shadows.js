@@ -28,6 +28,8 @@ var Shadows = (function definePolarPoint(obj) {
 			function set(self, angle, distance) {
 				self.angle = angle;
 				self.distance = distance;
+
+				return self;
 			},
 		equals: (DEF(
 			['self', {n: 'other', is: ['Shadows.PolarPoint']}],
@@ -50,6 +52,13 @@ var Shadows = (function definePolarPoint(obj) {
 
 				return self;
 			}),
+		toCartesian: 
+			function toCartesian(self) {
+				var cartesian = Shadows.CartesianPoint();
+				cartesian.fromPolar([self]);
+
+				return cartesian;
+			},
 		toString: 
 			function toString(self) {
 				var distance = Shadows.Math.round([self.distance, 2]);
@@ -61,8 +70,13 @@ var Shadows = (function definePolarPoint(obj) {
 		interpolateLine: DEF(
 			['self', {n: 'line', is: ['Shadows.PolarLine']}, 'angle'],
 			function interpolateLine(self, line, angle) {
-				self.angle = angle;
-				self.distance = line.interpolate([angle]);
+				var distance = line.interpolate([angle]);
+
+				// Use this, as `self` can be part of `line`
+				self.set({
+					distance: distance,
+					 angle: angle
+				});
 
 				return self;
 			}),

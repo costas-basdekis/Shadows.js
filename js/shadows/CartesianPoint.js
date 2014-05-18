@@ -32,6 +32,8 @@ var Shadows = (function defineCartesianPoint(obj) {
 			function (self, x, y) {
 				self.x = x;
 				self.y = y;
+
+				return self;
 			},
 		equals: DEF(
 			['self', {n: 'other', is: ['Shadows.CartesianPoint']}],
@@ -94,6 +96,8 @@ var Shadows = (function defineCartesianPoint(obj) {
 					x: other.distance * Math.cos(other.angle),
 					y: other.distance * Math.sin(other.angle),
 				});
+
+				return self;
 			}),
 	});
 

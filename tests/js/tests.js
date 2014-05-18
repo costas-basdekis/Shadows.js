@@ -418,6 +418,27 @@ test("PolarLine", function() {
 			}
 		}
 	}
+
+	ok(Shadows.PolarPoint().interpolateLine, "interpolateLine exists");
+
+	var testCases = [
+		{start:{x: -10, y: 10}, end: {x: 10, y: 10}, attribute: 'y', equals: 10},
+		{start:{x: 10, y: 10}, end: {x: 10, y: -10}, attribute: 'x', equals: 10},
+	];
+
+	var cl1 = Shadows.CartesianLine(), pl1 = Shadows.PolarLine();
+	var cp1 = Shadows.CartesianPoint(), pp1 = Shadows.PolarPoint();
+	for (var i = 0, testCase ; testCase = testCases[i] ; i++) {
+		cl1.start.set(testCase.start);
+		cl1.end.set(testCase.end);
+		pl1.fromCartesian([cl1]);
+		var dAngle = pl1.end.angle - pl1.start.angle, testCount = 10;
+		for (var angle = pl1.start.angle ; angle <= pl1.end.angle ; angle += dAngle / testCount) {
+			pp1.interpolateLine({line: pl1, angle: angle});
+			cp1.fromPolar([pp1]);
+			ok(Shadows.Math.CIEq([cp1[testCase.attribute], testCase.equals]), "interpolateLine is correct");
+		}
+	}
 });
 
 test("Walls", function() {
