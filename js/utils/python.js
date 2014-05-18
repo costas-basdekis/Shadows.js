@@ -578,21 +578,6 @@ var curry = (function defineCurry() {
 		argObj.callArguments = callArguments;
 	}
 
-	function handleException(argObj) {
-		var e = argObj.exception;
-
-		if (e.__localexception__ == True) {
-			e.__localexception__ = False;
-			console.error(e.toString());
-			e.stack.push(argObj);
-		} else if (e.__localexception__ == False) {
-			console.error('in %s()'.interpolate(argObj.defObj.fullname));
-			e.stack.push(argObj);
-		} else {
-			console.error('in %s(): %s'.interpolate(argObj.defObj.fullname, e));
-		}
-	}
-
 	function preCall(_this, _arguments, defObj) {
 		var argObj = {
 			this: _this,
@@ -615,11 +600,6 @@ var curry = (function defineCurry() {
 	}
 
 	function postCall(argObj) {
-		if (argObj.exception) {
-			handleException(argObj);
-			throw argObj.exception;
-		}
-
 		var result = argObj.result;
 
 		if (equalsNaN(result) || typeof result === Infinity) {
@@ -635,13 +615,9 @@ var curry = (function defineCurry() {
 		defObj.curriedArgs = args || [];
 
 		function __PYTHONPROXY__() {
-			var argObj = {defObj: defObj};
-			try {
-				argObj = preCall(this, arguments, defObj);
-				argObj.result = func.apply(argObj.this, argObj.callArguments);
-			} catch (e) {
-				argObj.exception = e;
-			}
+			var argObj = preCall(this, arguments, defObj);
+
+			argObj.result = func.apply(argObj.this, argObj.callArguments);
 
 			return postCall(argObj);
 		}
