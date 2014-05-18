@@ -18,39 +18,66 @@
 	<script type="text/javascript" src="js/shadows/Walls.js"></script>
 	<script type="text/javascript" src="js/shadows/NewSections.js"></script>
 
+	<script type="text/javascript" src="js/demo/fps.js"></script>
 	<script type="text/javascript" src="js/demo/demo.js"></script>
 	<script type="text/javascript" src="js/demo/create-walls.js"></script>
 	<script type="text/javascript" src="js/demo/draw-shadows.js"></script>
-	<script type="text/javascript" src="js/demo/fps.js"></script>
 	<script type="text/javascript" src="js/demo/tools/move-center.js"></script>
+	<script type="text/javascript" src="js/demo/step-by-step.js"></script>
+
+	<style type="text/css">
+		label {
+			cursor: pointer;
+			background: solid;
+		}
+		.inline {
+			display: inline-block;
+			vertical-align: top;
+		}
+	</style>
 </head>
 <body>
 	<a href="tests/tests.html">Tests page</a>
 	<br/>
-	<label>
-		Mute Logger
-		<input type="checkbox" id="muteLogger" checked>
-	</label>
-	<br/>
-	<label>
-		Debug drawing
-		<input type="checkbox" id="debugDrawing" checked>
-	</label>
-	<br/>
-	<label>
-		Compute FPS:
-		<span id="computeFPS"></span>
-	</label>
-	<br/>
-	<label>
-		Draw FPS:
-		<span id="drawFPS"></span>
-	</label>
-	<br/>
-	<label>
-		Total FPS:
-		<span id="totalFPS"></span>
-	</label>
+	<div>
+		<div class="inline">
+			<label>
+				Mute Logger
+				<input type="checkbox" id="muteLogger" checked>
+			</label>
+			<br/>
+			<label>
+				Debug drawing
+				<input type="checkbox" id="debugDrawing" checked>
+			</label>
+			<br/>
+			<label>
+				Compute FPS:
+				<span id="computeFPS"></span>
+			</label>
+			<br/>
+			<label>
+				Draw FPS:
+				<span id="drawFPS"></span>
+			</label>
+			<br/>
+			<label>
+				Total FPS:
+				<span id="totalFPS"></span>
+			</label>
+			<div>
+				<button id="stepStart">Start</button>
+				<button id="stepStep" disabled>Step</button>
+				<button id="stepEnd" disabled>End</button>
+			</div>
+		</div>
+		<div class="inline">
+			<select size="5" id="presets">
+				<option data-x="549", data-y="282"></option>
+				<option data-x="183", data-y="146"></option>
+			</select>
+		</div>
+	</div>
 	<canvas id="myCanvas" resize></canvas>
 
 	<script type="text/javascript">
@@ -64,6 +91,17 @@
 		}
 
 		window.onload = onLoad;
+
+		function displayPresets() {
+			var presets = document.getElementById('presets').children;
+			for (var i = 0, preset ; preset = presets[i] ; i++) {
+				var x = parseInt(preset.attributes.getNamedItem('data-x').value),
+					y = parseInt(preset.attributes.getNamedItem('data-y').value);
+				preset.innerText = "%s, %s".interpolate(x, y);
+			}
+		}
+
+		displayPresets();
 	</script>
 </body>
 </html>

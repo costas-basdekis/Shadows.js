@@ -19,6 +19,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 		document.getElementById('muteLogger').onclick = this.muteLogger_onclick;
 		document.getElementById('debugDrawing').onclick = this.debugDrawing_onclick;
+		document.getElementById('presets').onclick = this.presets_onchange;
 	};
 
 	App.muteLogger_onclick = function muteLogger_onclick() {
@@ -51,6 +52,19 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App.redraw = function redraw() {
 		_.view.draw();
 	};
+
+	App.presets_onchange = function presets_onchange() {
+		var listBox = document.getElementById('presets');
+		var selectedIndex = listBox.selectedIndex;
+		var selectedOption = listBox.options[selectedIndex];
+		if (!selectedOption) {
+			return;
+		}
+		var x = parseInt(selectedOption.attributes.getNamedItem('data-x').value);
+		var y = parseInt(selectedOption.attributes.getNamedItem('data-y').value);
+
+		App.compute({x: x, y: y});
+	}
 
 	App.compute = function compute(center) {
 		App.center.set({x: center.x, y: center.y});

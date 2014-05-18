@@ -66,6 +66,8 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 				}
 			}
 		}
+
+		_.view.draw();
 	};
 
 	return obj;
