@@ -35,6 +35,17 @@ var Logger = CLASS('utils.Logger', {
 		function unmute(self) {
 			self.muted = False;
 		},
+	begin:
+		function begin(self) {
+			if (!self.muted) {
+				console.clear();
+			}
+			self.log([">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"]);
+		},
+	end:
+		function end(self) {
+			self.log(["<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"]);
+		},
 	log: DEF(
 		['self', 'format', '*'],
 		function log(self, format, args) {
