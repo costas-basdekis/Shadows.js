@@ -22,6 +22,30 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 				self.sectionsReserve = self.sections.concat(self.sectionsReserve);
 				self.sections = [];
 			},
+		getSection:
+			function getSection(self, index) {
+				var section = self.sections[index];
+
+				if (!section) {
+					throw ExceptionBase("Out of bounds index: %s".interpolate(index));
+				}
+
+				return section;
+			},
+		getSectionWrapped:
+			function getSectionWrapped(self, index) {
+				var wrappedIndex = index;
+
+				if (wrappedIndex < 0) {
+					wrappedIndex += self.sections.length;
+				} else if (wrappedIndex >= self.sections.length) {
+					wrappedIndex -= self.sections.length;
+				}
+
+				var section = self.getSection([wrappedIndex]);
+
+				return section;
+			},
 		intersects: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function intersects(self, section) {

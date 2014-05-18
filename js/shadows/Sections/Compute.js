@@ -15,7 +15,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 			},
 		getSection:
 			function getSection(self, index) {
-				return self.sections.sections[index];
+				return self.sections.getSection([index]);
 			},
 		compute: DEF(
 			['self', {n: 'center', is: ['Shadows.CartesianPoint']}],
