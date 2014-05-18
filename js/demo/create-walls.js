@@ -13,7 +13,8 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	};
 
 	App.addOuterBox = function addOuterBox () {
-		this.walls.addBox([{x: 10, y: 10}, {x: 590, y: 590}]);
+		this.walls.addBox([{x: 100, y: 100}, {x: 500, y: 500}]);
+		this.walls.addBox([{x: 200, y: 200}, {x: 400, y: 400}]);
 	};
 
 	App.linesToPath = function linesToPath(lines, compoundPath) {
