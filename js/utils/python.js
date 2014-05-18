@@ -126,7 +126,7 @@ String.prototype.interpolate = (function defineInterpolate() {
 
 	function interpolateReplace(args, index) {
 		if (index >= args.length) {
-			throw InterpolateException('Interpolate got too many arguments');
+			throw InterpolateException('Interpolate got too few arguments');
 		}
 
 		var thisArg = args[index];
@@ -151,7 +151,7 @@ String.prototype.interpolate = (function defineInterpolate() {
 		});
 
 		if (index < args.length) {
-			throw InterpolateException('Interpolate got too few arguments');
+			throw InterpolateException('Interpolate got too many arguments');
 		}
 
 		return result;
