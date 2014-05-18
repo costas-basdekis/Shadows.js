@@ -33,9 +33,9 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 					batchEnd = self.getBatchEnd([batchStart]);
 					batchStartSection = self.sections[batchStart];
 					batchEndSection = self.sections[batchEnd];
-					if (batchStart == 1 &&
+					if (batchStart == 0 &&
 						batchEnd == (self.sections.length - 1) &&
-						batchStartSection.isAdjacentTo([batchEndSection], {inOrder: True})) {
+						batchEndSection.isAdjacentTo([batchStartSection], {inOrder: True})) {
 						return True;
 					}
 
