@@ -285,6 +285,16 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.icInsertAfter([self.tailSection, self.conflictIndex]);
 			},
 		//Sections management
+		icPostAlterSections:
+			function icPostAlterSections(self) {
+				if (self.conflictIndex >= self.firstConflict) {
+					self.conflictSection = self.getSection([self.conflictIndex]);
+				}
+				else {
+					self.conflictSection = null;
+				}
+				self.logNewIntersect();
+			},
 		logNewIntersect:
 			function logNewIntersect(self) {
 				self.logger.log(["New intersect: %s,%s @%s",
@@ -307,8 +317,8 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex >= index) {
 					self.conflictIndex++;
 				}
-				self.conflictSection = self.getSection([self.conflictIndex]);
-				self.logNewIntersect();
+
+				self.icPostAlterSections();
 
 				self.logger.dedent();
 			}),
@@ -329,8 +339,8 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex > index) {
 					self.conflictIndex++;
 				}
-				self.conflictSection = self.getSection([self.conflictIndex]);
-				self.logNewIntersect();
+
+				self.icPostAlterSections();
 
 				self.logger.dedent();
 			}),
@@ -356,8 +366,12 @@ var Shadows = (function defineSectionsCompute(obj) {
 				//Add second part
 				self.icInsertAfter([secondPart, index]);
 
+				self.icPostAlterSections();
+
 				//Finaly, add section
 				self.icInsertAfter([section, index]);
+
+				self.icPostAlterSections();
 
 				self.logger.dedent();
 			}),
@@ -380,8 +394,8 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex >= index) {
 					self.conflictIndex--;
 				}
-				self.conflictSection = self.getSection([self.conflictIndex]);
-				self.logNewIntersect();
+
+				self.icPostAlterSections();
 
 				self.logger.dedent();
 			},
