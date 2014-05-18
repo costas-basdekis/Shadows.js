@@ -12,6 +12,10 @@ var Shadows = (function defineSectionsCompute(obj) {
 					logger: self.logger,
 				});
 			},
+		getSection:
+			function getSection(self, index) {
+				return self.sections.sections[index];
+			},
 		compute: DEF(
 			['self', {n: 'center', is: ['Shadows.CartesianPoint']}],
 			function compute(self, center) {
@@ -136,7 +140,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.log(["End of loop: %s", self.isEndOfLoop]);
 
 				self.logger.log(["Tail %s", self.tailSection]);
-				self.conflictSection = self.sections.sections[self.conflictIndex];
+				self.conflictSection = self.getSection([self.conflictIndex]);
 				self.logger.log(["For #%s: %s", self.conflictIndex, self.conflictSection]);
 			},
 		icEndOfLoop:
@@ -304,7 +308,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex >= index) {
 					self.conflictIndex++;
 				}
-				self.conflictSection = self.sections.sections[self.conflictIndex];
+				self.conflictSection = self.getSection([self.conflictIndex]);
 				self.logNewIntersect();
 
 				self.logger.dedent();
@@ -326,7 +330,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex > index) {
 					self.conflictIndex++;
 				}
-				self.conflictSection = self.sections.sections[self.conflictIndex];
+				self.conflictSection = self.getSection([self.conflictIndex]);
 				self.logNewIntersect();
 
 				self.logger.dedent();
@@ -341,7 +345,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.log(["Insert & split %s: %s", index, section]);
 
 				//First split
-				var splitSection = self.sections[index];
+				var splitSection = self.getSection([index]);
 				var secondPart = Shadows.PolarLine({
 					start: self.compareSection.end.__copy__(),
 					end: splitSection.end.__copy__(),
@@ -362,7 +366,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 			function icRemoveSection(self, index) {
 				self.logger.indent();
 
-				var section = self.sections.sections[index];
+				var section = self.getSection([index]);
 				self.logger.log(["Remove section %s: %s", index, section]);
 				self.sections._remove([index]);
 
@@ -377,7 +381,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (self.conflictIndex >= index) {
 					self.conflictIndex--;
 				}
-				self.conflictSection = self.sections.sections[self.conflictIndex];
+				self.conflictSection = self.getSection([self.conflictIndex]);
 				self.logNewIntersect();
 
 				self.logger.dedent();
