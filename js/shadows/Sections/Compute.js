@@ -155,7 +155,10 @@ var Shadows = (function defineSectionsCompute(obj) {
 		icSplitInHCT:
 			function icSplitInHCT(self) {
 				assert(self.headSection == null, "Head section exists before splitting in HCT");
-				assert(self.tailSection, "Tail section does not exist before splitting in HCT");
+
+				if (!self.tailSection) {
+					return;
+				}
 
 				self.commonSection.copyFrom([self.tailSection]);
 				self.commonSection.limitToAngles([self.conflictSection]);
