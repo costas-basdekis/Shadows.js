@@ -7,14 +7,19 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	App.createWalls = function createWalls() {
 		this.addOuterBox();
+		var interval = 200, size = interval / 2;
+		for (var x = 100 + size ; (x + size) < 550 ; x += interval) {
+			for (var y = 100 + size ; (y + size) < 550 ; y += interval) {
+				this.walls.addBox([{x: x, y: y}, {x: x + size, y: y + size}]);
+			}
+		}
 
 		this.paper.wallsPath = new _.CompoundPath();
 		this.linesToPath(this.walls.lines, this.paper.wallsPath);
 	};
 
 	App.addOuterBox = function addOuterBox () {
-		this.walls.addBox([{x: 100, y: 100}, {x: 500, y: 500}]);
-		this.walls.addBox([{x: 200, y: 200}, {x: 400, y: 400}]);
+		this.walls.addBox([{x: 100, y: 100}, {x: 550, y: 550}]);
 	};
 
 	App.linesToPath = function linesToPath(lines, compoundPath) {
