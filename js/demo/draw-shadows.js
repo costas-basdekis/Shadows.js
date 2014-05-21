@@ -21,10 +21,12 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 		var logger = shadows.logger;
 
+		var section = shadows.getSectionWrapped([-1]), prevSection;
 		var cSection = Shadows.CartesianLine(), prevCSection;
 		var start, end, thisStart, center = new _.Point(shadows.center.x, shadows.center.y);
 		for (var i = 0 ; i < shadows.sections.length ; i++) {
-			var section = shadows.sections[i];
+			prevSection = section;
+			section = shadows.sections[i];
 
 			prevCSection = cSection;
 			cSection = section.toCartesian();
@@ -40,7 +42,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 					.toCartesian()
 					.plus([shadows.center]);
 				logger.log(['Prev and this %s %s', prevCSection, cSection]);
-				if (!this.debugDrawing && cSection.start.equals([prevCSection.end])) {
+				if (!this.debugDrawing && Shadows.Math.CIEq([section.start.angle, prevSection.end.angle])) {
 					logger.log(['Connects with end']);
 					path.moveTo(start);
 				} else {
@@ -49,21 +51,18 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 				}
 				path.lineTo(end);
 			} else {
-				if (!this.debugDrawing && cSection.start.equals([prevCSection.end])) {
+				if (!this.debugDrawing &&
+					Shadows.Math.CIEq([section.start.angle, prevSection.end.angle])) {
 					logger.log(['Continue to %s', cSection.end]);
-
-					end = new _.Point(cSection.end.x, cSection.end.y);
-					path.lineTo(end);
 				} else {
 					logger.log(['New batch %s', cSection]);
-
-					start = new _.Point(cSection.start.x, cSection.start.y);
-					end = new _.Point(cSection.end.x, cSection.end.y);
-
 					path.lineTo(center);
-					path.lineTo(start);
-					path.lineTo(end);
 				}
+
+				start = new _.Point(cSection.start.x, cSection.start.y);
+				end = new _.Point(cSection.end.x, cSection.end.y);
+				path.lineTo(start);
+				path.lineTo(end);
 			}
 		}
 
