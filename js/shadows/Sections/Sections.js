@@ -118,7 +118,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 				var prevSection = self.sections[batchStart];
 
 				for (var i = batchStart + 1, section ; section = self.sections[i] ; i++) {
-					if (!section.isAdjacentTo([prevSection])) {
+					if (!prevSection.isAdjacentTo([section], {inOrder: True})) {
 						return i - 1;
 					}
 					prevSection = section;
@@ -199,6 +199,40 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		_remove: 
 			function _remove(self, index) {
 				self.sections.splice(index, 1);
+			},
+		shift:
+			function shift(self, newFirst) {
+				if (newFirst == 0) {
+					return;
+				}
+
+				var head = self.sections.splice(0, newFirst);
+				var tail = self.sections;
+
+				self.sections = tail.concat(head);
+			},
+		mergeFirstBatch:
+			function mergeFirstBatch(self) {
+				if (self.sections.length <= 1) {
+					return;
+				}
+
+				var firstSection = self.getSectionWrapped([0]);
+				var lastSection = self.getSectionWrapped([-1]);
+				if (!lastSection.isAdjacentTo([firstSection], {inOrder: True})) {
+					return;
+				}
+
+				var batchStart = 0;
+				var batchEnd = self.getBatchEnd([batchStart]);
+
+				if (batchEnd == (self.sections.length - 1)) {
+					return;
+				}
+
+				self.shift({newFirst: batchEnd + 1});
+
+				self.logger.log(["Merge first batch, reposition: %s is first", batchStart]);
 			},
 	});
 

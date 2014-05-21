@@ -89,6 +89,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 					} else {
 						self.sections.insertNoConflicts([section]);
 					}
+					self.sections.mergeFirstBatch();
 				}
 
 				self.logger.dedent();
