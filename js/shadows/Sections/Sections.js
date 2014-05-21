@@ -89,36 +89,23 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 				batchEnd = 0;
 				while (batchStart < self.sections.length) {
 					batchStartSection = self.sections[batchStart];
-					//Append to the start of the batch
-					if (section.isAdjacentTo([batchStartSection], {inOrder: True})) {
-						self.logger.log(["Insert before batch starting @%s", batchStart]);
+
+					var prevSection = self.getSectionWrapped([batchStart - 1]);
+					if (section.isBetween([prevSection, batchStartSection])) {
+						self.logger.log(["Insert before batch @%s", batchStart]);
 						self._insertBefore([section, batchStart]);
 						return;
 					}
 
-					//Append to the end of the batch
 					batchEnd = self.getBatchEnd([batchStart]);
 					batchEndSection = self.sections[batchEnd];
-					if (batchEndSection.isAdjacentTo([section], {inOrder: True})) {
-						self.logger.log(["Insert after batch ending @%s", batchEnd]);
-						self._insertAfter([section, batchEnd]);
-						return;
-					}
-
-					if (batchEnd < (self.sections.length - 1)) {
-						var nextSection = self.sections[batchEnd + 1];
-						if (self.isBetween([batchEndSection, nextSection])) {
-							self.logger.log(["Insert after batch @%s", batchEnd]);
-							self._insertAfter([section, batchEnd]);
-						}
-					}
-
 					batchStart = batchEnd + 1;
 				}
 
-				var firstSection = self.sections[0], lastSection = batchEndSection;
+				var firstSection = self.getSectionWrapped([0]),
+					lastSection = self.getSectionWrapped([-1]);
 
-				if (section.isBetween([lastSection,firstSection])) {
+				if (section.isBetween([lastSection, firstSection])) {
 					self.logger.log(["Insert in the end, after @%s", self.sections.length - 1]);
 					self._insertLast([section]);
 					return;
