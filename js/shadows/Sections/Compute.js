@@ -106,7 +106,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				self.headSection = null;
 				self.commonSection = Shadows.PolarLine();
-				self.compareSection = Shadows.PolarLine();
+				self.compareSection = self.sections.newSection();
 				self.tailSection = section.__deepcopy__();
 
 
@@ -133,6 +133,8 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				assert(!self.headSection, "No head at the end of the loop");
 				self.icInsertLastTail();
+
+				self.compareSection = self.sections.freeSection([self.compareSection]);
 			}),
 		icStartOfLoop: 
 			function icStartOfLoop(self) {
