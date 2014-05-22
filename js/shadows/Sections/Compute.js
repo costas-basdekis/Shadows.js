@@ -359,10 +359,9 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				//First split
 				var splitSection = self.getSection([index]);
-				var secondPart = Shadows.PolarLine({
-					start: self.compareSection.end.__copy__(),
-					end: splitSection.end.__copy__(),
-				});
+				var secondPart = self.sections.newSection();
+				secondPart.start.copyFrom([self.compareSection.end]);
+				secondPart.end.copyFrom([splitSection.end]);
 
 				//Then shorten
 				splitSection.end.copyFrom([self.compareSection.start]);
