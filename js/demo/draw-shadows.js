@@ -19,6 +19,11 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 		path.removeSegments();
 
+		if (shadows.sections.length == 0) {
+			_.view.draw();
+			return;
+		}
+
 		var logger = shadows.logger;
 
 		var section = shadows.getSectionWrapped([-1]), prevSection;
