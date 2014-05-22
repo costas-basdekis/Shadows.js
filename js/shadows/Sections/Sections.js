@@ -65,8 +65,10 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		intersects: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function intersects(self, section) {
-				var batchStart, batchEnd, batchSection = PolarLine();
+				var batchStart, batchEnd, batchSection = self.newSection();
 				var batchStartSection, batchEndSection;
+
+				var result = False;
 
 				batchStart = 0;
 				while (batchStart < self.sections.length) {
@@ -76,18 +78,22 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 					if (batchStart == 0 &&
 						batchEnd == (self.sections.length - 1) &&
 						batchEndSection.isAdjacentTo([batchStartSection], {inOrder: True})) {
-						return True;
+						result = True;
+						break;
 					}
 
 					batchSection.start.copyFrom([batchStartSection.start]);
 					batchSection.end.copyFrom([batchEndSection.end]);
 					if (section.intersects([batchSection])) {
-						return True;
+						result = True;
+						break;
 					}
 					batchStart = batchEnd + 1;
 				}
 
-				return False;
+				self.freeSection([batchSection]);
+
+				return result;
 			}),
 		insertNoConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
