@@ -105,7 +105,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.log(["Intersect %s-%s", self.firstConflict, self.lastConflict]);
 
 				self.headSection = null;
-				self.commonSection = Shadows.PolarLine();
+				self.commonSection = self.sections.newSection();
 				self.compareSection = self.sections.newSection();
 				self.tailSection = section.__deepcopy__();
 
@@ -135,6 +135,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.icInsertLastTail();
 
 				self.compareSection = self.sections.freeSection([self.compareSection]);
+				self.commonSection = self.sections.freeSection([self.commonSection]);
 			}),
 		icStartOfLoop: 
 			function icStartOfLoop(self) {
@@ -254,28 +255,30 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 					//Conflict contains it - it gets split
 					self.icInsertSplit([commonSection, self.conflictIndex]);
+					commonSection = self.commonSection = null;
 				} else {
 					//Covers only the start or the end of the section
-					if (self.conflictSection.containsAngle([self.commonSection.end.angle])) {
+					if (self.conflictSection.containsAngle([commonSection.end.angle])) {
 						//Shorten section
 						self.conflictSection.start.interpolateLine([
-							self.conflictSection, self.commonSection.end.angle]);
+							self.conflictSection, commonSection.end.angle]);
 						self.logger.log(["Shorten start of %s: now %s", self.conflictIndex, self.conflictSection]);
 						self.logger.log(["Common before conflict"]);
 						//Add before
-						self.icInsertBefore([self.commonSection, self.conflictIndex]);
+						self.icInsertBefore([commonSection, self.conflictIndex]);
+						commonSection = self.commonSection = null;
 					} else {
-						assert(self.conflictSection.containsAngleInclusive([self.commonSection.start.angle]),
+						assert(self.conflictSection.containsAngleInclusive([commonSection.start.angle]),
 							"Common covers only the start or the end of the conflict");
 						//Shorten Section
 						self.conflictSection.end.interpolateLine([
-							self.conflictSection, self.commonSection.start.angle]);
+							self.conflictSection, commonSection.start.angle]);
 						self.logger.log(["Shorten end of %s: now %s", self.conflictIndex, self.conflictSection]);
 						//Append to tail
 						if (self.tailSection) {
-							self.tailSection.start.copyFrom([self.commonSection.start]);
+							self.tailSection.start.copyFrom([commonSection.start]);
 						} else {
-							self.tailSection = self.commonSection.__deepcopy__();
+							self.tailSection = commonSection.__deepcopy__();
 						}
 						self.logger.log(["Common after conflict"]);
 					}
