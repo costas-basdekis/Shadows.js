@@ -411,6 +411,52 @@ DEF = (function defineDEF() {
 	return DEF;
 })();
 
+var PythonMetrics = {
+	python: 0,
+	program: 0,
+	_pythonCount: 0,
+	_programCount: 0,
+	startPython: function startPython() {
+		this._pythonStart = new Date;
+		this._pythonCount++;
+	},
+	endPython: function endPython() {
+		if (!this._pythonStart) {
+			throw "WHAT";
+		}
+		this._pythonCount--;
+
+		var now = new Date;
+		var diff = now - this._pythonStart;
+
+		this.python += diff;
+		this._pythonStart = new Date;
+	},
+	startProgram: function startProgram() {
+		if (!this._programCount) {
+			this._programStart = new Date;
+		}
+		this._programCount++;
+	},
+	endProgram: function endProgram() {
+		if (!this._programStart) {
+			throw "WHAT";
+		}
+		this._programCount--;
+
+		if (this._programCount == 0) {
+			var now = new Date;
+			var diff = now - this._programStart;
+
+			this.program += diff;
+			this._programStart = null;
+		}
+	},
+	overheadPerCent: function overheadPerCent() {
+		return Math.round(this.python / this.program * 100) + "%";
+	},
+};
+
 var curry = (function defineCurry() {
 	function CE(argObj, message) {
 		var msg = 'calling %s(): %s'.interpolate(argObj.defObj.fullname, message);
@@ -615,11 +661,23 @@ var curry = (function defineCurry() {
 		defObj.curriedArgs = args || [];
 
 		function __PYTHONPROXY__() {
-			var argObj = preCall(this, arguments, defObj);
+			PythonMetrics.startProgram();
+			PythonMetrics.startPython();
+			try {
+				var argObj = preCall(this, arguments, defObj);
 
-			argObj.result = func.apply(argObj.this, argObj.callArguments);
+				PythonMetrics.endPython();
+				try {
+					argObj.result = func.apply(argObj.this, argObj.callArguments);
+				} finally {
+					PythonMetrics.startPython();
+				}
 
-			return postCall(argObj);
+				return postCall(argObj);
+			} finally {
+				PythonMetrics.endPython();
+				PythonMetrics.endProgram();
+			}
 		}
 
 		putMetaData(defObj, __PYTHONPROXY__);
