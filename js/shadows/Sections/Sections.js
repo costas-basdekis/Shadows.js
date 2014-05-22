@@ -22,6 +22,22 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 				self.sectionsReserve = self.sections.concat(self.sectionsReserve);
 				self.sections = [];
 			},
+		newSection: function newSection(self) {
+			if (self.sectionsReserve.length) {
+				return self.sectionsReserve.pop();
+			} else {
+				return PolarLine();
+			}
+		},
+		freeSection: DEF(
+			['self', {n: 'section', is:['Shadows.PolarLine']}],
+			function freeSection(self, section) {
+				if (section) {
+					self.sectionsReserve.push(section);
+				}
+
+				return null;
+			}),
 		getSection:
 			function getSection(self, index) {
 				var section = self.sections[index];
