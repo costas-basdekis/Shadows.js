@@ -14,6 +14,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 					logger: self.logger,
 				});
 				self.center = Shadows.CartesianPoint();
+				self.metrics = Metrics();
 			},
 		getSection:
 			function getSection(self, index) {
@@ -83,15 +84,25 @@ var Shadows = (function defineSectionsCompute(obj) {
 				} else if (section.isOnPoint()) {
 					self.logger.log(['On top of point - ignore']);
 				} else {
+					self.metrics.start(['ComputeStep']);
+					self.metrics.start(['ComputeStep.intersects']);
 					var intersects = self.sections.intersects([section]);
+					self.metrics.end(['ComputeStep.intersects']);
 
 					self.logger.log(["Intersects: %s", intersects]);
 					if (intersects) {
+						self.metrics.start(['ComputeStep.insertConflicts']);
 						self.insertConflicts([section]);
+						self.metrics.end(['ComputeStep.insertConflicts']);
 					} else {
+						self.metrics.start(['ComputeStep.insertNoConflicts']);
 						self.sections.insertNoConflicts([section]);
+						self.metrics.end(['ComputeStep.insertNoConflicts']);
 					}
+					self.metrics.start(['ComputeStep.mergeFirstBatch']);
 					self.sections.mergeFirstBatch();
+					self.metrics.end(['ComputeStep.mergeFirstBatch']);
+					self.metrics.end(['ComputeStep']);
 				}
 
 				self.logger.dedent();
@@ -99,47 +110,71 @@ var Shadows = (function defineSectionsCompute(obj) {
 		insertConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function insertConflicts(self, section) {
+				self.metrics.start(['ComputeStep.insertConflicts.getFirstInterSection']);
 				self.firstConflict = self.sections.getFirstInterSection([section]);
+				self.metrics.end(['ComputeStep.insertConflicts.getFirstInterSection']);
+				self.metrics.start(['ComputeStep.insertConflicts.getLastInterSection']);
 				self.lastConflict = self.sections.getLastInterSection({
 					section: section,
 					firstInterSection: self.firstConflict,
 				});
+				self.metrics.end(['ComputeStep.insertConflicts.getLastInterSection']);
 				self.logger.log(["Intersect %s-%s", self.firstConflict, self.lastConflict]);
 
+				self.metrics.start(['ComputeStep.insertConflicts.MakeSections']);
 				self.headSection = null;
 				self.commonSection = PolarLine.__make__();
 				self.compareSection = PolarLine.__make__();
 				self.tailSection = PolarLine.__make__().copyFrom([section]);
+				self.metrics.end(['ComputeStep.insertConflicts.MakeSections']);
 
 
 				self.conflictIndex = self.firstConflict;
 				self.logger.indent();
+				self.metrics.start(['ComputeStep.insertConflicts.Loop']);
 				do {
+					self.metrics.start(['ComputeStep.insertConflicts.Loop.icStartOfLoop']);
 					self.icStartOfLoop();
+					self.metrics.end(['ComputeStep.insertConflicts.Loop.icStartOfLoop']);
 
 					self.logger.indent();
 
+					self.metrics.start(['ComputeStep.insertConflicts.Loop.icSplitInHCT']);
 					self.icSplitInHCT();
+					self.metrics.end(['ComputeStep.insertConflicts.Loop.icSplitInHCT']);
+					self.metrics.start(['ComputeStep.insertConflicts.Loop.icDetermineVisibility']);
 					self.icDetermineVisibility();
+					self.metrics.end(['ComputeStep.insertConflicts.Loop.icDetermineVisibility']);
+					self.metrics.start(['ComputeStep.insertConflicts.Loop.icDealWithHead']);
 					self.icDealWithHead();
+					self.metrics.end(['ComputeStep.insertConflicts.Loop.icDealWithHead']);
 					if (self.isVisible) {
+						self.metrics.start(['ComputeStep.insertConflicts.Loop.icShortenCommonSection']);
 						self.icShortenCommonSection();
+						self.metrics.end(['ComputeStep.insertConflicts.Loop.icShortenCommonSection']);
+						self.metrics.start(['ComputeStep.insertConflicts.Loop.icInsertCommonSection']);
 						self.icInsertCommonSection();
+						self.metrics.end(['ComputeStep.insertConflicts.Loop.icInsertCommonSection']);
 					} else {
 						self.logger.log(["Discard - it's hidden"]);
 					}
 
 					self.logger.dedent();
 				} while (!self.icEndOfLoop())
+				self.metrics.end(['ComputeStep.insertConflicts.Loop']);
 				self.logger.dedent();
 
 				assert(!self.headSection, "No head at the end of the loop");
+				self.metrics.start(['ComputeStep.insertConflicts.icInsertLastTail']);
 				self.icInsertLastTail();
+				self.metrics.end(['ComputeStep.insertConflicts.icInsertLastTail']);
 
+				self.metrics.start(['ComputeStep.insertConflicts.TakeSections']);
 				self.headSection = PolarLine.__take__([self.headSection]);
 				self.compareSection = PolarLine.__take__([self.compareSection]);
 				self.commonSection = PolarLine.__take__([self.commonSection]);
 				self.tailSection = PolarLine.__take__([self.tailSection]);
+				self.metrics.end(['ComputeStep.insertConflicts.TakeSections']);
 			}),
 		icStartOfLoop: 
 			function icStartOfLoop(self) {
@@ -162,28 +197,36 @@ var Shadows = (function defineSectionsCompute(obj) {
 			},
 		icSplitInHCT:
 			function icSplitInHCT(self) {
-				assert(self.headSection == null, "Head section exists before splitting in HCT");
+				assert(!self.headSection, "Head section exists before splitting in HCT");
 
 				if (!self.tailSection) {
 					return;
 				}
 
+				self.metrics.start(['ComputeStep.insertConflicts.Loop.icSplitInHCT.limitCommon']);
 				self.commonSection.copyFrom([self.tailSection]);
 				self.commonSection.limitToAngles([self.conflictSection]);
+				self.metrics.end(['ComputeStep.insertConflicts.Loop.icSplitInHCT.limitCommon']);
+				self.metrics.start(['ComputeStep.insertConflicts.Loop.icSplitInHCT.atAnglesCompare']);
 				self.compareSection.copyFrom([self.conflictSection]);
 				self.compareSection.atAngles([self.commonSection]);
+				self.metrics.end(['ComputeStep.insertConflicts.Loop.icSplitInHCT.atAnglesCompare']);
 
 				var headStart = self.tailSection.start, headEnd = self.commonSection.start;
+				self.metrics.start(['ComputeStep.insertConflicts.Loop.icSplitInHCT.MakeHead']);
 				if (!headStart.equals([headEnd])) {
 					self.headSection = PolarLine.__make__();
 					self.headSection.start.copyFrom([headStart]);
 					self.headSection.end.copyFrom([headEnd]);
 				}
+				self.metrics.end(['ComputeStep.insertConflicts.Loop.icSplitInHCT.MakeHead']);
 
+				self.metrics.start(['ComputeStep.insertConflicts.Loop.icSplitInHCT.MakeTail']);
 				self.tailSection.start.copyFrom([self.commonSection.end]);
 				if (self.tailSection.isEmpty()) {
 					self.tailSection = PolarLine.__take__([self.tailSection]);
 				}
+				self.metrics.end(['ComputeStep.insertConflicts.Loop.icSplitInHCT.MakeTail']);
 
 				if (self.headSection) {
 					self.logger.log(["head %s", self.headSection]);
