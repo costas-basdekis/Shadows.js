@@ -874,7 +874,7 @@ CLASS = (function defineCLASS() {
 	}
 
 	function createObject(cls) {
-		var obj = {};
+		var obj = {__class__: cls};
 		var bases = getBases(cls)
 
 		var supers = obj.__supers__ = {};
@@ -893,8 +893,6 @@ CLASS = (function defineCLASS() {
 				super_[baseKey] = bound;
 			}
 		}
-
-		obj.__class__ = cls;
 
 		return obj;
 	}
