@@ -1,4 +1,5 @@
 var Shadows = (function defineNewSections(obj) {
+	var PolarLine = Shadows.PolarLine;
 	var NewSections = Shadows.NewSections = CLASS('Shadows.NewSections', {
 		__init__: 
 			function __init__(self) {
@@ -7,10 +8,18 @@ var Shadows = (function defineNewSections(obj) {
 				self.sections = [];
 				self.sectionsReserve = [];
 			},
+		newSection:
+			function newSection(self) {
+				return self.sectionsReserve.pop() || PolarLine.__make__();
+			},
+		freeMany:
+			function freeMany(self, sections) {
+				self.sectionsReserve = self.sectionsReserve.concat(sections);
+			},
 		fromLines: 
 			function fromLines(self, lines, center) {
 				self.center = center;
-				self.sectionsReserve = self.sectionsReserve.concat(self.sections);
+				self.freeMany([self.sections]);
 				self.sections = [];
 
 				var cl = Shadows.CartesianLine(), pl;
@@ -18,11 +27,7 @@ var Shadows = (function defineNewSections(obj) {
 				for (var i = 0, line ; line = lines[i] ; i++) {
 					cl.copyFrom([line]);
 					cl.minus([self.center]);
-					if (self.sectionsReserve.length) {
-						pl = self.sectionsReserve.pop();
-					} else {
-						pl = Shadows.PolarLine();
-					}
+					pl = self.newSection();
 					pl.fromCartesian([cl]);
 					self.sections.push(pl);
 				}
