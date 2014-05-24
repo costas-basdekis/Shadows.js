@@ -1,4 +1,6 @@
 var Shadows = (function defineSectionsCompute(obj) {
+	var PolarLine = Shadows.PolarLine;
+	
 	var Sections = Shadows.Sections = Shadows.Sections || {};
 	var Compute = Sections.Compute = CLASS('Shadows.Sections.Compute', {
 		__init__: 
@@ -105,9 +107,9 @@ var Shadows = (function defineSectionsCompute(obj) {
 				self.logger.log(["Intersect %s-%s", self.firstConflict, self.lastConflict]);
 
 				self.headSection = null;
-				self.commonSection = self.sections.newSection();
-				self.compareSection = self.sections.newSection();
-				self.tailSection = section.__deepcopy__();
+				self.commonSection = PolarLine.__make__();
+				self.compareSection = PolarLine.__make__();
+				self.tailSection = PolarLine.__make__().copyFrom([section]);
 
 
 				self.conflictIndex = self.firstConflict;
@@ -134,8 +136,10 @@ var Shadows = (function defineSectionsCompute(obj) {
 				assert(!self.headSection, "No head at the end of the loop");
 				self.icInsertLastTail();
 
-				self.compareSection = self.sections.freeSection([self.compareSection]);
-				self.commonSection = self.sections.freeSection([self.commonSection]);
+				self.headSection = PolarLine.__take__([self.headSection]);
+				self.compareSection = PolarLine.__take__([self.compareSection]);
+				self.commonSection = PolarLine.__take__([self.commonSection]);
+				self.tailSection = PolarLine.__take__([self.tailSection]);
 			}),
 		icStartOfLoop: 
 			function icStartOfLoop(self) {
@@ -171,14 +175,14 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				var headStart = self.tailSection.start, headEnd = self.commonSection.start;
 				if (!headStart.equals([headEnd])) {
-					self.headSection = Shadows.PolarLine();
+					self.headSection = PolarLine.__make__();
 					self.headSection.start.copyFrom([headStart]);
 					self.headSection.end.copyFrom([headEnd]);
 				}
 
 				self.tailSection.start.copyFrom([self.commonSection.end]);
 				if (self.tailSection.isEmpty()) {
-					self.tailSection = null;
+					self.tailSection = PolarLine.__take__([self.tailSection]);
 				}
 
 				if (self.headSection) {
@@ -210,12 +214,12 @@ var Shadows = (function defineSectionsCompute(obj) {
 				if (!self.startIsVisible) {
 					self.logger.log(["Insert head"]);
 					self.icInsertBefore([self.headSection, self.conflictIndex]);
+					self.headSection = null;
 				} else {
 					self.commonSection.start.copyFrom([self.headSection.start]);
 					self.logger.log(["Join with head, now %s", self.commonSection]);
+					self.headSection = PolarLine.__take__([self.headSection]);
 				}
-
-				self.headSection = null;
 			},
 		icShortenCommonSection:
 			function icShortenCommonSection(self) {
@@ -248,7 +252,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 					if (self.tailSection) {
 						self.tailSection.start.copyFrom([self.commonSection.start]);
 					} else {
-						self.tailSection = self.commonSection.__deepcopy__();
+						self.tailSection = PolarLine.__make__().copyFrom([self.commonSection]);
 					}
 				} else if (conflictSection.containsSection([commonSection])) {
 					self.logger.log(["Conflict contains common"]);
@@ -278,7 +282,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 						if (self.tailSection) {
 							self.tailSection.start.copyFrom([commonSection.start]);
 						} else {
-							self.tailSection = commonSection.__deepcopy__();
+							self.tailSection = self.section.newSection().copyFrom([self.commonSection]);
 						}
 						self.logger.log(["Common after conflict"]);
 					}
@@ -292,6 +296,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				self.logger.log(["Final tail %s, insert at end", self.tailSection]);
 				self.icInsertAfter([self.tailSection, self.conflictIndex]);
+				self.tailSection = null;
 			},
 		//Sections management
 		icPostAlterSections:
@@ -364,7 +369,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				//First split
 				var splitSection = self.getSection([index]);
-				var secondPart = self.sections.newSection();
+				var secondPart = PolarLine.__make__();
 				secondPart.start.copyFrom([self.compareSection.end]);
 				secondPart.end.copyFrom([splitSection.end]);
 

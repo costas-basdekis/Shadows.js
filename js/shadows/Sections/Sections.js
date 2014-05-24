@@ -8,7 +8,6 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 			['self', {n: 'logger', is: ['utils.Logger']}],
 			function __init__(self, logger) {
 				self.sections = [];
-				self.sectionsReserve = [];
 				self.logger = logger;
 			}),
 		log: 
@@ -19,25 +18,8 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 			},
 		clear: 
 			function clear(self) {
-				self.sectionsReserve = self.sections.concat(self.sectionsReserve);
 				self.sections = [];
 			},
-		newSection: function newSection(self) {
-			if (self.sectionsReserve.length) {
-				return self.sectionsReserve.pop();
-			} else {
-				return PolarLine();
-			}
-		},
-		freeSection: DEF(
-			['self', {n: 'section', is:['Shadows.PolarLine']}],
-			function freeSection(self, section) {
-				if (section) {
-					self.sectionsReserve.push(section);
-				}
-
-				return null;
-			}),
 		getSection:
 			function getSection(self, index) {
 				var section = self.sections[index];
@@ -65,7 +47,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		intersects: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function intersects(self, section) {
-				var batchStart, batchEnd, batchSection = self.newSection();
+				var batchStart, batchEnd, batchSection = PolarLine.__make__();
 				var batchStartSection, batchEndSection;
 
 				var result = False;
@@ -91,7 +73,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 					batchStart = batchEnd + 1;
 				}
 
-				self.freeSection([batchSection]);
+				PolarLine.__take__([batchSection]);
 
 				return result;
 			}),
@@ -111,7 +93,6 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 				batchEnd = 0;
 				while (batchStart < self.sections.length) {
 					batchStartSection = self.sections[batchStart];
-
 					var prevSection = self.getSectionWrapped([batchStart - 1]);
 					if (section.isBetween([prevSection, batchStartSection])) {
 						self.logger.log(["Insert before batch @%s", batchStart]);
@@ -199,7 +180,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		_insertInitial: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function _insertInitial(self, section) {
-				var	iSection = section.__deepcopy__();
+				var	iSection = PolarLine.__make__().copyFrom([section]);
 
 				self.sections.push(iSection);
 			}),
