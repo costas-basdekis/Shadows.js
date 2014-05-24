@@ -1051,11 +1051,17 @@ object = CLASS(None, 'object', {
 		}),
 	__take__: CLASSMETHOD(
 		function __take__(cls, obj) {
+			cls.__reserves__ = cls.__reserves__ || [];
 			if (obj) {
 				cls.__reserves__.push(obj);
 			}
 
 			return null;
+		}),
+	__take_many__: CLASSMETHOD(
+		function __take_many__(cls, objs) {
+			cls.__reserves__ = cls.__reserves__ || [];
+			cls.__reserves__ = cls.__reserves__.concat(objs);
 		}),
 	__init__: 
 		function __init__(self) {
