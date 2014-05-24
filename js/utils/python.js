@@ -1039,13 +1039,7 @@ object = CLASS(None, 'object', {
 	__make__: CLASSMETHOD(
 		function __make__(cls) {
 			cls.__reserves__ = cls.__reserves__ || [];
-			var obj = cls.__reserves__.pop();
-
-			if (obj) {
-				obj.__init__();
-			} else {
-				obj = cls.__new__();
-			}
+			var obj = cls.__reserves__.pop() || cls.__new__();
 
 			return obj;
 		}),
