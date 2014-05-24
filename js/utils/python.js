@@ -805,6 +805,10 @@ CLASS = (function defineCLASS() {
 		for (var i = 0, key ; key = baseKeys[i] ; i++) {
 			var property = base[key];
 
+			if (cls.hasOwnProperty(key)) {
+				continue;
+			}
+
 			if (!property.__bind__ || property.__bind__.__bind_to__ != 'instance') {
 				cls[key] = property;
 			}
