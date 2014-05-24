@@ -1038,6 +1038,27 @@ JS = (function defineJS() {
 //The base class of all Python classes
 object = CLASS(None, 'object', {
 	__maxuuid__: 0,
+	__make__: CLASSMETHOD(
+		function __make__(cls) {
+			cls.__reserves__ = cls.__reserves__ || [];
+			var obj = cls.__reserves__.pop();
+
+			if (obj) {
+				obj.__init__();
+			} else {
+				obj = cls.__new__();
+			}
+
+			return obj;
+		}),
+	__take__: CLASSMETHOD(
+		function __take__(cls, obj) {
+			if (obj) {
+				cls.__reserves__.push(obj);
+			}
+
+			return null;
+		}),
 	__init__: 
 		function __init__(self) {
 			self.__uuid__ = object.__class_def__.__maxuuid__;
