@@ -755,6 +755,7 @@ CLASS = (function defineCLASS() {
 
 		setName(cls, name);
 		setMethodsName(cls);
+		copyBaseMethods(cls);
 	}
 
 	function setName(cls, name) {
@@ -793,6 +794,35 @@ CLASS = (function defineCLASS() {
 			if (defObj) {
 				defObj.namespace = cls.__fullname__;
 				defObj.fullname = '%s.%s'.interpolate(defObj.namespace, defObj.funcname);
+			}
+		}
+	}
+
+	function copyBaseMethods(cls) {
+		var base = cls.__base__;
+		var baseKeys = getBaseKeys(base);
+
+		for (var i = 0, key ; key = baseKeys[i] ; i++) {
+			var property = base[key];
+
+			if (!property.__bind__ || property.__bind__.__bind_to__ != 'instance') {
+				cls[key] = property;
+			}
+		}
+	}
+
+	function copyClassMethods(klass) {
+		var cls = klass.__class_def__;
+		var clsKeys = getBaseKeys(cls);
+
+		for (var i = 0, key ; key = clsKeys[i] ; i++) {
+			var property = cls[key];
+
+			if (!property.__bind__ || property.__bind__.__bind_to__ != 'instance') {
+				if (property.__bind__) {
+					property = property.__bind__(property, {__class__: cls});
+				}
+				klass[key] = property;
 			}
 		}
 	}
@@ -903,6 +933,8 @@ CLASS = (function defineCLASS() {
 		__new__.__class_def__ = cls;
 		cls.__new__ = __new__;
 
+		copyClassMethods(__new__);
+
 		return __new__;
 	}
 
@@ -916,6 +948,7 @@ METHOD = (function defineMETHOD() {
 
 		return bound;
 	}
+	bind.__bind_to__ = 'instance';
 
 	function METHOD(func) {
 		if (!func.__PYTHON_FUNC__) {
@@ -950,6 +983,7 @@ CLASSMETHOD = (function defineCLASSMETHOD() {
 
 		return bound;
 	}
+	bind.__bind_to__ = 'class';
 
 	function CLASSMETHOD(func) {
 		if (!func.__PYTHON_FUNC__) {
@@ -970,6 +1004,7 @@ STATICMETHOD = (function defineSTATICMETHOD() {
 		func.__func__ = func;
 		return func;
 	}
+	bind.__bind_to__ = 'static';
 
 	function STATICMETHOD(func) {
 		if (!func.__PYTHON_FUNC__) {
