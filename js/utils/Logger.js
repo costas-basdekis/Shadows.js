@@ -122,4 +122,4 @@ var Logger = CLASS('utils.Logger', {
 
 			return self.tabs;
 		},
-})
+});
