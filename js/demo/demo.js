@@ -17,6 +17,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		this.initMouse()
 		this.redraw();
 		this.stepByStep.init();
+		this.displayMetrics.init();
 
 		document.getElementById('muteLogger').onclick = this.muteLogger_onclick;
 		document.getElementById('debugDrawing').onclick = this.debugDrawing_onclick;

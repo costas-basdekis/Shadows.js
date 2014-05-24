@@ -1,7 +1,11 @@
 var Metrics = CLASS('utils.Metrics', {
 	__init__:
 		function __init__(self) {
-			self.root = {};
+			self.clear();
+		},
+	clear:
+		function clear(self) {
+			self.root = {_name: '<root>', _children: []};
 		},
 	getPart:
 		function getPart(self, name) {
@@ -10,7 +14,13 @@ var Metrics = CLASS('utils.Metrics', {
 			var part = self.root;
 
 			for (var i = 0, partName ; partName = path[i] ; i++) {
-				part = part[partName] = part[partName] || {};
+				if (!part[partName]) {
+					part._children.push(part[partName] = {
+						_name: partName,
+						_children: [],
+					});
+				}
+				part = part[partName];
 			}
 
 			self.initPart([part]);

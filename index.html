@@ -25,6 +25,7 @@
 	<script type="text/javascript" src="js/demo/draw-shadows.js"></script>
 	<script type="text/javascript" src="js/demo/tools/move-center.js"></script>
 	<script type="text/javascript" src="js/demo/step-by-step.js"></script>
+	<script type="text/javascript" src="js/demo/display-metrics.js"></script>
 
 	<style type="text/css">
 		label {
@@ -34,6 +35,26 @@
 		.inline {
 			display: inline-block;
 			vertical-align: top;
+			max-height: 24ex;
+			overflow-y: scroll;
+		}
+
+		#metrics {
+			border-color: green;
+			border-style: solid;
+			border-width: 2px;
+			border-radius: 12px 12px 0px 0px;
+		}
+		#metrics tr:not(:first-child):nth-child(2n) {
+			background-color: aliceblue;
+		}
+		#metrics tr:not(:first-child):nth-child(2n+1) {
+			background-color: bisque;
+		}
+		#metrics tr td:first-child {
+			cursor: pointer;
+			min-width: 2ex;
+			text-align: center;
 		}
 	</style>
 </head>
@@ -83,6 +104,32 @@
 				<option data-x="183", data-y="146"></option>
 			</select>
 		</div>
+		<div class="inline">
+			<button id="clearMetrics">Clear</button>
+			<button id="refreshMetrics">Refresh</button>
+			<table id="metrics"><tbody>
+				<tr>
+					<th></th>
+					<th>Name</th>
+					<th>Time</th>
+					<th>%</th>
+					<th>% (all)</th>
+					<th>Count</th>
+					<th>spf</th>
+				</tr>
+			</tbody></table>
+		</div>
+		<script type="text/x-template" id="metrics-row-template">
+			<tr class="metrics-row">
+				<td>-</td>
+				<td>%s</td>
+				<td>%s</td>
+				<td>%s%%</td>
+				<td>%s%%</td>
+				<td>%s</td>
+				<td>%s</td>
+			</tr>
+		</script>
 	</div>
 	<canvas id="myCanvas" resize></canvas>
 
