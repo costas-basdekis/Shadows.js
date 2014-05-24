@@ -35,7 +35,7 @@ var Shadows = (function defineNewSections(obj) {
 		sortKey: STATICMETHOD(DEF(
 			[{n: 'line', is: ['Shadows.PolarLine']}],
 			function sortKey(line) {
-				return Math.min(line.start.distance, line.end.distance);
+				return Math.max(line.start.distance, line.end.distance);
 			})),
 		sortFunction: JS(function sortFunction(lhs, rhs) {
 				var sortKey = Shadows.NewSections.__class_def__.sortKey;
