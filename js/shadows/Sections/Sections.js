@@ -7,8 +7,8 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		__init__: DEF(
 			['self', {n: 'logger', is: ['utils.Logger']}],
 			function __init__(self, logger) {
-				self.sections = [];
 				self.logger = logger;
+				self.clear();
 			}),
 		log: 
 			function log(self) {
@@ -19,6 +19,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		clear: 
 			function clear(self) {
 				self.sections = [];
+				self.lastIntersects = null;
 			},
 		getSection:
 			function getSection(self, index) {
@@ -47,6 +48,14 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		intersects: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function intersects(self, section) {
+				if (!self.sections.length) {
+					return False;
+				}
+
+				if (self.lastIntersects == 'All') {
+					return True;
+				}
+
 				var batchStart, batchEnd, batchSection = PolarLine.__make__();
 				var batchStartSection, batchEndSection;
 
@@ -57,9 +66,10 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 					batchEnd = self.getBatchEnd([batchStart]);
 					batchStartSection = self.sections[batchStart];
 					batchEndSection = self.sections[batchEnd];
-					if (batchStart == 0 &&
-						batchEnd == (self.sections.length - 1) &&
+					if ((batchStart == 0) &&
+						(batchEnd == self.sections.length - 1) &&
 						batchEndSection.isAdjacentTo([batchStartSection], {inOrder: True})) {
+						self.lastIntersects = 'All'
 						result = True;
 						break;
 					}
