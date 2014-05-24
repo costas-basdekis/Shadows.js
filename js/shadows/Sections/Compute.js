@@ -282,7 +282,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 						if (self.tailSection) {
 							self.tailSection.start.copyFrom([commonSection.start]);
 						} else {
-							self.tailSection = self.section.newSection().copyFrom([self.commonSection]);
+							self.tailSection = PolarLine.__make__().copyFrom([self.commonSection]);
 						}
 						self.logger.log(["Common after conflict"]);
 					}
