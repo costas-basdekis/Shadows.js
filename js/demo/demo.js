@@ -93,6 +93,8 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		App.drawFPS.end();
 
 		App.totalFPS.end();
+
+		document.getElementById('pythonOverhead').innerText = PythonMetrics.overheadPerCent();
 	};
 
 	return obj;
