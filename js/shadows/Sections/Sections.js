@@ -8,6 +8,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 			['self', {n: 'logger', is: ['utils.Logger']}],
 			function __init__(self, logger) {
 				self.logger = logger;
+				self.batches = Shadows.Sections.Batches([self]);
 				self.clear();
 			}),
 		log: 
@@ -20,6 +21,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 			function clear(self) {
 				self.sections = [];
 				self.lastIntersects = null;
+				self.batches.clear();
 			},
 		getSection:
 			function getSection(self, index) {
