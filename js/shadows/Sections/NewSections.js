@@ -1,6 +1,8 @@
 var Shadows = (function defineNewSections(obj) {
 	var PolarLine = Shadows.PolarLine;
-	var NewSections = Shadows.NewSections = CLASS('Shadows.NewSections', {
+
+	var SectionsModule = Shadows.Sections = Shadows.Sections || {};
+	var NewSections = SectionsModule.NewSections = CLASS('Shadows.Sections.NewSections', {
 		__init__: 
 			function __init__(self) {
 				self.__super__({name: '__init__'})();
@@ -38,7 +40,7 @@ var Shadows = (function defineNewSections(obj) {
 				return Math.max(line.start.distance, line.end.distance);
 			})),
 		sortFunction: JS(function sortFunction(lhs, rhs) {
-				var sortKey = Shadows.NewSections.__class_def__.sortKey;
+				var sortKey = Shadows.Sections.NewSections.sortKey;
 			 	var lKey = sortKey([lhs]);
 			 	var rKey = sortKey([rhs]);
 

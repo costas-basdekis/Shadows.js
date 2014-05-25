@@ -9,7 +9,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				self.lines = lines;
 				self.logger = Logger({tab: '  '});
-				self.newSections = Shadows.NewSections();
+				self.newSections = Shadows.Sections.NewSections();
 				self.sections = Shadows.Sections.Sections({
 					logger: self.logger,
 				});
