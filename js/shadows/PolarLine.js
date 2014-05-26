@@ -257,8 +257,13 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 		atAngles: DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}],
 			function atAngles(self, other) {
-				self.start.interpolateLine([self, other.start.angle]);
+				var temp = Shadows.PolarPoint.__make__();
+
+				temp.interpolateLine([self, other.start.angle]);
 				self.end.interpolateLine([self, other.end.angle]);
+				self.start.copyFrom([temp]);
+
+				Shadows.PolarPoint.__take__([temp]);
 
 				return self;
 			}),
