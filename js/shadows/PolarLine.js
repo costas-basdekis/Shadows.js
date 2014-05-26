@@ -13,14 +13,6 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				self.end = end;
 				self.coefsCache = {};
 			}),
-		__make__: CLASSMETHOD(
-			function __make__(cls) {
-				obj = PolarLine.__class_def__.__base__.__make__({cls: cls});
-
-				obj.clearCoefsCache();
-
-				return obj;
-			}),
 		__copy__: 
 			function __copy__(self) {
 				return PolarLine({
@@ -45,7 +37,7 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 			}),
 		clearCoefsCache:
 			function clearCoefsCache(self) {
-				self.coefsCache = {coefs: self.coefsCache.coefs};
+				self.coefsCache = {};
 			},
 		getCoefs:
 			function getCoefs(self) {
@@ -233,7 +225,6 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				var coefs = self.getCoefs();
 
 				var distance = coefs.atAngle([angle]);
-				Shadows.PolarLineCoefs.__take__([coefs]);
 
 				return distance;
 			},
