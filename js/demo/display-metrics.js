@@ -14,6 +14,7 @@ var ShadowsApp = (function defineDispalyMetrics(obj, _) {
 		this.display.startPeriodical();
 		document.getElementById('clearMetrics').onclick = this.clearMetrics_onclick;
 		document.getElementById('refreshMetrics').onclick = this.refreshMetrics_onclick;
+		document.getElementById('pauseMetrics').onclick = this.pauseMetrics_onclick;
 	};
 
 	displayMetrics.clearMetrics_onclick = function clearMetrics_onclick() {
@@ -23,6 +24,10 @@ var ShadowsApp = (function defineDispalyMetrics(obj, _) {
 
 	displayMetrics.refreshMetrics_onclick = function refreshMetrics_onclick() {
 		displayMetrics.display();
+	};
+
+	displayMetrics.pauseMetrics_onclick = function pauseMetrics_onclick() {
+		App.computeSections.sections.metrics.paused = this.checked;
 	};
 
 	displayMetrics.deleteRows = function deleteRows() {

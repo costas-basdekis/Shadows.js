@@ -1,8 +1,10 @@
 var Metrics = CLASS('utils.Metrics', {
-	__init__:
-		function __init__(self) {
+	__init__: DEF(
+		['self', {n: 'paused', d: True}],
+		function __init__(self, paused) {
+			self.paused = paused;
 			self.clear();
-		},
+		}),
 	clear:
 		function clear(self) {
 			self.root = {_name: '<root>', _children: []};
@@ -40,6 +42,10 @@ var Metrics = CLASS('utils.Metrics', {
 		},
 	start:
 		function start(self, name) {
+			if (self.paused) {
+				return;
+			}
+
 			var part = self.getPart([name]);
 
 			if (!part._count) {
@@ -49,6 +55,10 @@ var Metrics = CLASS('utils.Metrics', {
 		},
 	end:
 		function end(self, name) {
+			if (self.paused) {
+				return;
+			}
+
 			var part = self.getPart([name]);
 
 			assert(part._count);
