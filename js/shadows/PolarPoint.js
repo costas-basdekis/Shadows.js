@@ -31,12 +31,17 @@ var Shadows = (function definePolarPoint(obj) {
 
 				return self;
 			},
-		equals: (DEF(
+		equals: DEF(
 			['self', {n: 'other', is: ['Shadows.PolarPoint']}],
 			function equals(self, other) {
-				return Shadows.Math.CIEq([self.angle, other.angle]) &&
+				return self.sameAngle([other]) &&
 					   Shadows.Math.CIEq([self.distance, other.distance]);
-			})),
+			}),
+		sameAngle: DEF(
+			['self', {n: 'other', is: ['Shadows.PolarPoint']}],
+			function sameAngle(self, other) {
+				return Shadows.Math.CIEq([self.angle, other.angle]);
+			}),
 		offsetAngle: 
 			function offsetAngle(self, angle) {
 				self.angle = Shadows.Math.Polar.angleDiff([angle, self.angle]);

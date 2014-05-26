@@ -212,7 +212,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				var headStart = self.tailSection.start, headEnd = self.commonSection.start;
 				self.metrics.start(['ComputeStep.insertConflicts.Loop.icSplitInHCT.MakeHead']);
-				if (!headStart.equals([headEnd])) {
+				if (!headStart.sameAngle([headEnd])) {
 					self.headSection = PolarLine.__make__();
 					self.headSection.start.copyFrom([headStart]);
 					self.headSection.end.copyFrom([headEnd]);
