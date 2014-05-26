@@ -22,6 +22,8 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		document.getElementById('muteLogger').onclick = this.muteLogger_onclick;
 		document.getElementById('debugDrawing').onclick = this.debugDrawing_onclick;
 		document.getElementById('presets').onclick = this.presets_onchange;
+		document.getElementById('setCenter').onclick = this.setCenter_onclick;
+		document.getElementById('recalculate').onclick = this.recalculate_onclick;
 	};
 
 	App.muteLogger_onclick = function muteLogger_onclick() {
@@ -32,6 +34,15 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App.debugDrawing_onclick = function debugDrawing_onclick() {
 		var debugDrawing = this.checked;
 		App.debugDrawing = debugDrawing;
+	};
+
+	App.setCenter_onclick = function setCenter_onclick() {
+		App.center.x = parseInt(document.getElementById('centerX').value);
+		App.center.y = parseInt(document.getElementById('centerY').value);
+	};
+
+	App.recalculate_onclick = function recalculate_onclick() {
+		App.compute(App.center);
 	};
 
 	App.initPaper = function initPaper() {
@@ -77,6 +88,8 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	App.compute = function compute(center) {
 		App.center.set({x: center.x, y: center.y});
+		document.getElementById('centerX').value = center.x;
+		document.getElementById('centerY').value = center.y;
 
 		var path = App.paper.centerPath;
 		path.position = center;
