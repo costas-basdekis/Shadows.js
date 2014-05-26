@@ -45,10 +45,7 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 			}),
 		clearCoefsCache:
 			function clearCoefsCache(self) {
-				if (self.coefsCache.coefs) {
-					Shadows.PolarLineCoefs.__take__([self.coefsCache.coefs]);
-				}
-				self.coefsCache = {};
+				self.coefsCache = {coefs: self.coefsCache.coefs};
 			},
 		getCoefs:
 			function getCoefs(self) {
