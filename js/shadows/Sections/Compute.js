@@ -327,7 +327,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 						} else {
 							self.tailSection = PolarLine.__make__().copyFrom([self.commonSection]);
 						}
-						self.logger.log(["Common after conflict"]);
+						self.logger.log(["Common after conflict - append to tail"]);
 					}
 				}
 			},

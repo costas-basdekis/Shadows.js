@@ -550,13 +550,11 @@ test("ComputeSections", function() {
 	for (var i = 0, point ; point = pointsInside[i] ; i++) {
 		cp1.set(point);
 		ok(c1.compute({center: cp1}), "Compute 5B @%s".interpolate(cp1));
-		equal(c1.sections.batches.isOneWholeBatch, True, "Compute inside 5B @%s full batch".interpolate(cp1));
 	}
 
 	for (var i = 0, point ; point = pointsOutside[i] ; i++) {
 		cp1.set(point);
 		ok(c1.compute({center: cp1}), "Compute 5B @%s".interpolate(cp1));
-		equal(c1.sections.batches.isOneWholeBatch, False, "Compute outside 5B @%s not full batch".interpolate(cp1));
 	}
 });
 
