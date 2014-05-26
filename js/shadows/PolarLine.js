@@ -13,15 +13,13 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				self.end = end;
 				self.coefsCache = {};
 			}),
-		__take__: CLASSMETHOD(
-			function __take__(cls, obj) {
-				if (!obj) {
-					return null;
-				}
+		__make__: CLASSMETHOD(
+			function __make__(cls) {
+				obj = PolarLine.__class_def__.__base__.__make__({cls: cls});
 
 				obj.clearCoefsCache();
 
-				return obj.__super__({cls: cls, name: '__take__'})([obj]);
+				return obj;
 			}),
 		__copy__: 
 			function __copy__(self) {
@@ -245,6 +243,7 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 		limitToAngles: DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}],
 			function limitToAngles(self, other) {
+
 				if (self.containsAngleOrStart([other.start.angle])) {
 					self.start.interpolateLine([self, other.start.angle]);
 				}
@@ -257,13 +256,8 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 		atAngles: DEF(
 			['self', {n: 'other', is: ['Shadows.PolarLine']}],
 			function atAngles(self, other) {
-				var temp = Shadows.PolarPoint.__make__();
-
-				temp.interpolateLine([self, other.start.angle]);
+				self.start.interpolateLine([self, other.start.angle]);
 				self.end.interpolateLine([self, other.end.angle]);
-				self.start.copyFrom([temp]);
-
-				Shadows.PolarPoint.__take__([temp]);
 
 				return self;
 			}),
