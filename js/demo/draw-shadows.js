@@ -3,10 +3,17 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	App.paper = App.paper || {}
 	App.paper.shadowsPath = null;
+	App.paper.background = null;
+	App.paper.backgroundUrl = './img/moss_big.jpg';
+	App.paper.group = null;
 	App.debugDrawing = true;
 
 	App.createShadows = function createShadows() {
 		this.paper.shadowsPath = new _.Path();
+		this.paper.background = new _.Raster(this.paper.backgroundUrl);
+		this.paper.background.scaling = new _.Point(.6, .6);
+		this.paper.group = new _.Group(this.paper.shadowsPath, this.paper.background);
+		this.paper.group.clipped = true;
 	}
 
 	App.updateShadows = function updateShadows(shadows) {

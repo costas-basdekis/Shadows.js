@@ -7,7 +7,6 @@ var Shadows = (function defineSectionsCompute(obj) {
 			function __init__(self, lines) {
 				self.__super__({name: '__init__'})();
 
-				self.lines = lines;
 				self.logger = Logger({tab: '  '});
 				self.metrics = Metrics();
 				self.newSections = Shadows.Sections.NewSections();
@@ -16,6 +15,8 @@ var Shadows = (function defineSectionsCompute(obj) {
 					metrics: self.metrics,
 				});
 				self.center = Shadows.CartesianPoint();
+
+				self.setLines([lines]);
 			},
 		getSection:
 			function getSection(self, index) {
@@ -30,6 +31,10 @@ var Shadows = (function defineSectionsCompute(obj) {
 				}
 				return self.finish();
 			}),
+		setLines:
+			function setLines(self, lines) {
+				self.lines = lines;
+			},
 		start: DEF(
 			['self', {n: 'center', is: ['Shadows.CartesianPoint']}],
 			function start(self, center) {

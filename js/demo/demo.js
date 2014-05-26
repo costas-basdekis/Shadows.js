@@ -34,6 +34,8 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 	App.debugDrawing_onclick = function debugDrawing_onclick() {
 		var debugDrawing = this.checked;
 		App.debugDrawing = debugDrawing;
+		App.paper.group.clipped = !debugDrawing;
+		App.paper.background.opacity = debugDrawing ? 0 : 1;
 	};
 
 	App.setCenter_onclick = function setCenter_onclick() {
