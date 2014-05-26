@@ -5,14 +5,18 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 	var SectionsModule = Shadows.Sections = Shadows.Sections || {};
 	var Sections = SectionsModule.Sections = CLASS('Shadows.Sections.Sections', {
 		__init__: DEF(
-			['self', {n: 'logger', is: ['utils.Logger']}],
-			function __init__(self, logger) {
+			['self', {n: 'logger', is: ['utils.Logger']}, {n: 'metrics', is: ['utils.Metrics']}],
+			function __init__(self, logger, metrics) {
 				self.logger = logger;
+				self.metrics = metrics;
 				self.batches = Shadows.Sections.Batches([self]);
 				self.clear();
 			}),
 		log: 
 			function log(self) {
+				if (self.logger.muted) {
+					return;
+				}
 				for (var i = 0, section ; section = self.sections[i] ; i++) {
 					self.logger.log(["%s %s", i + 1, section]);
 				}
@@ -20,7 +24,6 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		clear: 
 			function clear(self) {
 				self.sections = [];
-				self.lastIntersects = null;
 				self.batches.clear();
 			},
 		getSection:
@@ -35,6 +38,14 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 			},
 		getSectionWrapped:
 			function getSectionWrapped(self, index) {
+				var wrappedIndex = self.wrapIndex([index]);
+
+				var section = self.getSection([wrappedIndex]);
+
+				return section;
+			},
+		wrapIndex:
+			function wrapIndex(self, index) {
 				var wrappedIndex = index;
 
 				if (wrappedIndex < 0) {
@@ -43,9 +54,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 					wrappedIndex -= self.sections.length;
 				}
 
-				var section = self.getSection([wrappedIndex]);
-
-				return section;
+				return wrappedIndex;
 			},
 		intersects: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
@@ -54,37 +63,33 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 					return False;
 				}
 
-				if (self.lastIntersects == 'All') {
+				if (self.batches.isOneWholeBatch) {
 					return True;
 				}
 
-				var batchStart, batchEnd, batchSection = PolarLine.__make__();
+				var batchSection = PolarLine.__make__();
+				var batchSectionStart = batchSection.start, batchSectionEnd = batchSection.end;
 				var batchStartSection, batchEndSection;
 
 				var result = False;
 
-				batchStart = 0;
-				while (batchStart < self.sections.length) {
-					batchEnd = self.getBatchEnd([batchStart]);
-					batchStartSection = self.sections[batchStart];
-					batchEndSection = self.sections[batchEnd];
-					if ((batchStart == 0) &&
-						(batchEnd == self.sections.length - 1) &&
-						batchEndSection.isAdjacentTo([batchStartSection], {inOrder: True})) {
-						self.lastIntersects = 'All'
-						result = True;
-						break;
-					}
+				var sections = self.sections, batches = self.batches.batches;
 
-					batchSection.start.copyFrom([batchStartSection.start]);
-					batchSection.end.copyFrom([batchEndSection.end]);
+				for (var i = 0, batch ; batch = batches[i] ; i++) {
+					batchStartSection = sections[batch.start];
+					batchEndSection = sections[batch.end];
+
+					batchSection.start = batchStartSection.start;
+					batchSection.end = batchEndSection.end;
+
 					if (section.intersects([batchSection])) {
 						result = True;
 						break;
 					}
-					batchStart = batchEnd + 1;
 				}
 
+				batchSection.start = batchSectionStart;
+				batchSection.end = batchSectionEnd;
 				PolarLine.__take__([batchSection]);
 
 				return result;
@@ -93,54 +98,36 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function insertNoConflicts(self, section) {
 				if (self.sections.length == 0) {
+					self.metrics.start(['ComputeStep.insertNoConflicts.insert']);
 					self.logger.log(["Insert first section"]);
+					self.metrics.end(['ComputeStep.insertNoConflicts.insert']);
 					self._insertInitial([section]);
 					return;
 				}
 
-				var batchStart, batchEnd;
-				var batchStartSection, batchEndSection;
+				var sections = self.sections, batches = self.batches.batches;
 
-				batchStart = 0;
-				batchEnd = 0;
-				while (batchStart < self.sections.length) {
-					batchStartSection = self.sections[batchStart];
-					var prevSection = self.getSectionWrapped([batchStart - 1]);
-					if (section.isBetween([prevSection, batchStartSection])) {
-						self.logger.log(["Insert before batch @%s", batchStart]);
-						self._insertBefore([section, batchStart]);
+				for (var i = 0, batch ; batch = batches[i] ; i++) {
+					var prevSection = self.getSectionWrapped([batch.start - 1]),
+						nextSection = sections[batch.start];
+
+					self.metrics.start(['ComputeStep.insertNoConflicts.isBetween']);
+					var isBetween = section.isBetween([prevSection, nextSection]);
+					self.metrics.end(['ComputeStep.insertNoConflicts.isBetween']);
+
+					if (isBetween) {
+						self.logger.log(["Insert before batch @%s", batch.start]);
+						self.metrics.start(['ComputeStep.insertNoConflicts.insert']);
+						self._insertBefore([section, batch.start]);
+						self.metrics.end(['ComputeStep.insertNoConflicts.insert']);
 						return;
 					}
 
-					batchEnd = self.getBatchEnd([batchStart]);
-					batchEndSection = self.sections[batchEnd];
-					batchStart = batchEnd + 1;
-				}
-
-				var firstSection = self.getSectionWrapped([0]),
-					lastSection = self.getSectionWrapped([-1]);
-
-				if (section.isBetween([lastSection, firstSection])) {
-					self.logger.log(["Insert in the end, after @%s", self.sections.length - 1]);
-					self._insertLast([section]);
-					return;
+					prevBatch = batch;
 				}
 
 				throw new ExceptionBase("insertNoConflicts did not insert @%s".interpolate(self.center));
 			}),
-		getBatchEnd: 
-			function getBatchEnd(self, batchStart) {
-				var prevSection = self.sections[batchStart];
-
-				for (var i = batchStart + 1, section ; section = self.sections[i] ; i++) {
-					if (!prevSection.isAdjacentTo([section], {inOrder: True})) {
-						return i - 1;
-					}
-					prevSection = section;
-				}
-
-				return self.sections.length - 1;
-			},
 		getFirstInterSection: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function getFirstIntersection(self, section) {
@@ -195,16 +182,19 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 				var	iSection = PolarLine.__make__().copyFrom([section]);
 
 				self.sections.push(iSection);
+				self.batches.insertSection([section, 0]);
 			}),
 		_insertBefore: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
 			function _insertBefore(self, section, index) {
 				self.sections.splice(index, 0, section);
+				self.batches.insertSection([section, index]);
 			}),
 		_insertAfter: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}, 'index'],
 			function _insertAfter(self, section, index) {
 				self.sections.splice(index + 1, 0, section);
+				self.batches.insertSection([section, index + 1]);
 			}),
 		_insertLast: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
@@ -214,40 +204,7 @@ var Shadows = (function defineSectionsSections(obj, jsMath) {
 		_remove: 
 			function _remove(self, index) {
 				self.sections.splice(index, 1);
-			},
-		shift:
-			function shift(self, newFirst) {
-				if (newFirst == 0) {
-					return;
-				}
-
-				var head = self.sections.splice(0, newFirst);
-				var tail = self.sections;
-
-				self.sections = tail.concat(head);
-			},
-		mergeFirstBatch:
-			function mergeFirstBatch(self) {
-				if (self.sections.length <= 1) {
-					return;
-				}
-
-				var firstSection = self.getSectionWrapped([0]);
-				var lastSection = self.getSectionWrapped([-1]);
-				if (!lastSection.isAdjacentTo([firstSection], {inOrder: True})) {
-					return;
-				}
-
-				var batchStart = 0;
-				var batchEnd = self.getBatchEnd([batchStart]);
-
-				if (batchEnd == (self.sections.length - 1)) {
-					return;
-				}
-
-				self.shift({newFirst: batchEnd + 1});
-
-				self.logger.log(["Merge first batch, reposition: %s is first", batchStart]);
+				self.batches.removeSection([index]);
 			},
 	});
 

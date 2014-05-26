@@ -9,12 +9,13 @@ var Shadows = (function defineSectionsCompute(obj) {
 
 				self.lines = lines;
 				self.logger = Logger({tab: '  '});
+				self.metrics = Metrics();
 				self.newSections = Shadows.Sections.NewSections();
 				self.sections = Shadows.Sections.Sections({
 					logger: self.logger,
+					metrics: self.metrics,
 				});
 				self.center = Shadows.CartesianPoint();
-				self.metrics = Metrics();
 			},
 		getSection:
 			function getSection(self, index) {
@@ -99,9 +100,6 @@ var Shadows = (function defineSectionsCompute(obj) {
 						self.sections.insertNoConflicts([section]);
 						self.metrics.end(['ComputeStep.insertNoConflicts']);
 					}
-					self.metrics.start(['ComputeStep.mergeFirstBatch']);
-					self.sections.mergeFirstBatch();
-					self.metrics.end(['ComputeStep.mergeFirstBatch']);
 					self.metrics.end(['ComputeStep']);
 				}
 
@@ -191,7 +189,7 @@ var Shadows = (function defineSectionsCompute(obj) {
 					return True;
 				}
 
-				self.conflictIndex = (self.conflictIndex + 1) % self.sections.sections.length;
+				self.conflictIndex = self.sections.wrapIndex([self.conflictIndex + 1]);
 
 				return False;
 			},
