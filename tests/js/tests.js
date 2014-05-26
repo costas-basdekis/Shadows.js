@@ -507,6 +507,57 @@ test("ComputeSections", function() {
 		cp1.set(point);
 		equal(c1.compute({center: cp1}), 4, "Compute @%s".interpolate(cp1));
 	}
+
+	w1 = Walls();
+	w1.addBox({
+		first: {x: 100, y: 100},
+		third: {x: 550, y: 550},
+	});
+	var interval = 200, size = interval / 5;
+	for (var x = 100 + size ; (x + size) < 550 ; x += interval) {
+		for (var y = 100 + size ; (y + size) < 550 ; y += interval) {
+			w1.addBox([{x: x, y: y}, {x: x + size, y: y + size}]);
+		}
+	}
+	c1 = Compute({lines: w1.lines});
+
+	var pointsInside = [
+		{x: 175, y: 175},
+		{x: 250, y: 250},
+		{x: 450, y: 450},
+		{x: 128, y: 516},
+		{x: 525, y: 125},
+		// Past failures
+		{x: 549, y: 282},
+		{x: 183, y: 146},
+		{x: 260, y: 293},
+		{x: 438, y: 249},
+		{x: 248, y: 448},
+	];
+	var pointsOutside = [
+		{x: 100, y: 100},
+		{x: 500, y: 100},
+		{x: 50, y: 50},
+		{x: 350, y: 50},
+		{x: 50, y: 50},
+		// Past failures
+		{x: 527, y: 30},
+		{x: -8, y: 27},
+		{x: 761, y: 27},
+		{x: 811, y: -254},
+	];
+
+	for (var i = 0, point ; point = pointsInside[i] ; i++) {
+		cp1.set(point);
+		ok(c1.compute({center: cp1}), "Compute 5B @%s".interpolate(cp1));
+		equal(c1.sections.batches.isOneWholeBatch, True, "Compute inside 5B @%s full batch".interpolate(cp1));
+	}
+
+	for (var i = 0, point ; point = pointsOutside[i] ; i++) {
+		cp1.set(point);
+		ok(c1.compute({center: cp1}), "Compute 5B @%s".interpolate(cp1));
+		equal(c1.sections.batches.isOneWholeBatch, False, "Compute outside 5B @%s not full batch".interpolate(cp1));
+	}
 });
 
 test("PolarLineCoefs", function() {
