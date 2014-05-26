@@ -2,6 +2,10 @@ var Shadows = (function defineWalls(obj) {
 	var Walls = obj.Walls = CLASS('Shadows.Walls', {
 		__init__:
 			function __init__(self) {
+				self.clear();
+			},
+		clear:
+			function clear(self) {
 				self.lines = [];
 			},
 		addLine:
@@ -15,11 +19,17 @@ var Shadows = (function defineWalls(obj) {
 			function addBox(self, first, third) {
 				var second = {x: third.x, y: first.y},
 					fourth = {x: first.x, y: third.y};
-				self.addLine({start: first, end: second});
-				self.addLine({start: second, end: third});
-				self.addLine({start: third, end: fourth});
-				self.addLine({start: fourth, end: first});
+				self.addPolygon([first, second, third, fourth])
 			},
+		addPolygon: DEF(
+			['self', '*'],
+			function addPolygon(self, points) {
+				var prevPoint = points[points.length - 1];
+				for (var i = 0, point ; point = points[i] ; i++) {
+					self.addLine({start: prevPoint, end: point});
+					prevPoint = point;
+				}
+			}),
 	});
 
 	return obj;
