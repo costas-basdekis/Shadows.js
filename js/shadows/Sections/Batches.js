@@ -292,7 +292,8 @@ var Shadows = (function defineSectionsBatches(obj, jsMath) {
 					batch.index = i;
 					if ((batch.start == batch.end) &&
 						(batch.start == index)) {
-						self.batches.splice(i, 0);
+						self.logger.log(['Remove batch %s', i]);
+						self.batches.splice(i, 1);
 						i--;
 						index -= 0.5;
 					} else {
