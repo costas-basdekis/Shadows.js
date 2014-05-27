@@ -8,8 +8,8 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	Tool.init = function init() {
 		var path = App.paper.centerPath = new _.Path.Circle({x: 50, y: 50}, 15);
-		path.strokeColor = 'black';
-		path.fillColor = 'black';
+		path.strokeColor = 'blue';
+		path.fillColor = 'blue';
 	};
 
 	Tool.onMouseDown =
