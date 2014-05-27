@@ -10,14 +10,15 @@ Run the [tests]
 Finally working!
 ==
 
-It's in a fully functional state, and demo allows the user to move the light source, in a fixed room
+It's in a fully functional state, and demo allows the user to move the light source, in several rooms.
 
 Todo:
 --
-1. Optimize
-2. Simplify
-3. Allow user to add boxes/lines in the demo app
-4. Remove python.js
+1. Fix bugs
+2. Optimize
+3. Simplify
+4. Allow user to add shapes/lines in the demo app
+5. Remove python.js
 
 
 Python.js

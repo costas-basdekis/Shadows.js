@@ -17,7 +17,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 			optionElement.outerHTML = optionHTML;
 		}
 		roomsElement.value = selected.name;
-		roomsElement.onclick = App.createWalls.rooms_onclick;
+		roomsElement.onchange = App.createWalls.rooms_onclick;
 
 		this.createWalls.useRoom(selected.name);
 	};
@@ -69,10 +69,19 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		//App.walls.addPolygon([{x: 450, y: 200}, {x: 400, y: 300}, {x: 500, y: 300}]);
 	};
 
+	App.createWalls.MoreMaze = function MoreMaze() {
+		App.createWalls.addOuterBox();
+		App.walls.addRegularPolygon({center: {x: 400, y: 400}, radius: 50, count: 3});
+		App.walls.addRegularPolygon({center: {x: 200, y: 300}, radius: 50, count: 6});
+		App.walls.addRegularPolygon({center: {x: 400, y: 200}, radius: 50, count: 5});
+		App.walls.addStar({center: {x: 200, y: 500}, smallRadius: 35, bigRadius: 65, count: 7});
+	};
+
 	App.createWalls.rooms = [
 		App.createWalls.TwoBoxes,
 		App.createWalls.FiveBoxes,
 		App.createWalls.Maze,
+		App.createWalls.MoreMaze,
 	];
 
 	App.createWalls.addOuterBox = function addOuterBox () {

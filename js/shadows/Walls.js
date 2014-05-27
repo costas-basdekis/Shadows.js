@@ -30,6 +30,36 @@ var Shadows = (function defineWalls(obj) {
 					prevPoint = point;
 				}
 			}),
+		addRegularPolygon: 
+			function addRegularPolygon(self, center, radius, count) {
+				var point = {}, prevPoint = {};
+
+				for (var i = 0 ; i < count ; i++) {
+					var angle = (i - 1) * Math.PI * 2 / count;
+					prevPoint.x = Math.cos(angle) * radius + center.x;
+					prevPoint.y = Math.sin(angle) * radius + center.y;
+					var angle = i * Math.PI * 2 / count;
+					point.x = Math.cos(angle) * radius + center.x;
+					point.y = Math.sin(angle) * radius + center.y;
+					self.addLine({start: prevPoint, end: point});
+				}
+			},
+		addStar: 
+			function addStar(self, center, smallRadius, bigRadius, count) {
+				var point = {}, prevPoint = {};
+
+				for (var i = 0 ; i < count * 2 ; i++) {
+					var angle = (i - 1) * Math.PI * 2 / (count * 2);
+					var radius = ((i + 1) % 2) ? smallRadius : bigRadius;
+					prevPoint.x = Math.cos(angle) * radius + center.x;
+					prevPoint.y = Math.sin(angle) * radius + center.y;
+					var angle = i * Math.PI * 2 / (count * 2);
+					var radius = (i % 2) ? smallRadius : bigRadius;
+					point.x = Math.cos(angle) * radius + center.x;
+					point.y = Math.sin(angle) * radius + center.y;
+					self.addLine({start: prevPoint, end: point});
+				}
+			},
 	});
 
 	return obj;

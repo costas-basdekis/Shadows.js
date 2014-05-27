@@ -33,7 +33,7 @@
 			cursor: pointer;
 			background: solid;
 		}
-		#showToolbar:not(:checked) + #toolbar {
+		#showToolbar:not(:checked) ~ #toolbar {
 			display: none;
 		}
 		.inline {
@@ -68,6 +68,10 @@
 </head>
 <body>
 	<a href="tests/tests.html">Tests page</a>
+	<label>
+		Room
+		<select id="rooms"></select>
+	</label>
 	<label for="showToolbar">Show toolbar</label><input type="checkbox" id="showToolbar">
 	<div id="toolbar">
 		<div class="inline">
@@ -79,11 +83,6 @@
 			<label>
 				Debug drawing
 				<input type="checkbox" id="debugDrawing">
-			</label>
-			<br/>
-			<label>
-				Room
-				<select id="rooms"></select>
 			</label>
 			<br/>
 			<label>
