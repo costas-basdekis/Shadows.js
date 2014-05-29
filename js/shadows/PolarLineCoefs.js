@@ -4,15 +4,34 @@ var Shadows = (function definePolarLineCoefs(obj, jsMath) {
 		__init__:
 			function __init__(self) {
 				self.coefs = [];
+				self.cached = {};
+			},
+		_isCached:
+			function _isCached(self, line) {
+				return (
+					(self.cached.startDistance == line.start.distance) &&
+					(self.cached.startAngle == line.start.angle) &&
+					(self.cached.endDistance == line.end.distance) &&
+					(self.cached.endAngle == line.end.angle));
+			},
+		_cache:
+			function _cache(self, line) {
+				self.cached.startDistance = line.start.distance;
+				self.cached.startAngle = line.start.angle;
+				self.cached.endDistance = line.end.distance;
+				self.cached.endAngle = line.end.angle;
 			},
 		fromLine: DEF(
 			['self', {n: 'line', is: ['Shadows.PolarLine']}],
 			function fromLine(self, line) {
-				self.getCoefs([line]);
-				var solution = Math.solve2x2([self.coefs]);
+				if (!self._isCached([line])) {
+					self.getCoefs([line]);
+					var solution = Math.solve2x2([self.coefs]);
 
-				self.coCos = solution.x;
-				self.coSin = solution.y;
+					self.coCos = solution.x;
+					self.coSin = solution.y;
+					self._cache([line]);
+				}
 
 				return self;
 			}),

@@ -11,7 +11,18 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 
 				self.start = start;
 				self.end = end;
-				self.coefsCache = {};
+			}),
+		__take__: CLASSMETHOD(
+			function __take__(cls, obj) {
+				if (!obj) {
+					return null;
+				}
+
+				if (obj.coefsCache) {
+					obj.coefsCache = Shadows.PolarLineCoefs.__take__([obj.coefsCache]);
+				}
+
+				return obj.__super__({cls: PolarLine, name: '__take__'})([obj]);
 			}),
 		__copy__: 
 			function __copy__(self) {
@@ -35,30 +46,16 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 
 				return self;
 			}),
-		clearCoefsCache:
-			function clearCoefsCache(self) {
-				self.coefsCache = {};
-			},
 		getCoefs:
 			function getCoefs(self) {
 				var coefsCache = self.coefsCache;
 
-				if (!coefsCache.coefs) {
-					coefsCache.coefs = Shadows.PolarLineCoefs.__make__();
+				if (!coefsCache) {
+					self.coefsCache = coefsCache = Shadows.PolarLineCoefs.__make__();
 				}
+				coefsCache.fromLine([self]);
 
-				if ((coefsCache.startDistance != self.start.distance) ||
-					(coefsCache.startAngle != self.start.angle) ||
-					(coefsCache.endDistance != self.end.distance) ||
-					(coefsCache.endAngle != self.end.angle)) {
-					coefsCache.coefs.fromLine([self]);
-					coefsCache.startDistance = self.start.distance;
-					coefsCache.startAngle = self.start.angle;
-					coefsCache.endDistance = self.end.distance;
-					coefsCache.endAngle = self.end.angle;
-				}
-
-				return coefsCache.coefs;
+				return coefsCache;
 			},
 		fromCartesian: DEF(
 			['self', {n: 'other', is: ['Shadows.CartesianLine']}],
