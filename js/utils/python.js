@@ -1098,6 +1098,8 @@ object = CLASS(None, 'object', {
 		function __super__(self, cls, name) {
 			if (cls === None) {
 				cls = self.__class__;
+			} else if (cls.__class_def__) {
+				cls = cls.__class_def__;
 			}
 
 			var i = 1;
@@ -1114,6 +1116,10 @@ object = CLASS(None, 'object', {
 			if (cls != base) {
 				throw PythonException('"%s" isn\'t a base of "%s"'.interpolate(
 					cls.__name__, self.__class__.__name__))
+			}
+
+			if (isFunction(name)) {
+				name = name.name;
 			}
 
 			while (base) {
