@@ -69,7 +69,7 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		//App.walls.addPolygon([{x: 450, y: 200}, {x: 400, y: 300}, {x: 500, y: 300}]);
 	};
 
-	App.createWalls.MoreMaze = function MoreMaze() {
+	App.createWalls.Shapes = function Shapes() {
 		App.createWalls.addOuterBox();
 		App.walls.addRegularPolygon({center: {x: 400, y: 400}, radius: 50, count: 3});
 		App.walls.addRegularPolygon({center: {x: 200, y: 300}, radius: 50, count: 6});
@@ -77,11 +77,31 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		App.walls.addStar({center: {x: 200, y: 500}, smallRadius: 35, bigRadius: 65, count: 7});
 	};
 
+	App.createWalls.MoreShapes = function MoreShapes() {
+		App.createWalls.addOuterBox();
+		for (var i = 0 ; i < 3 ; i++) {
+			for (var j = 0 ; j < 3 ; j++) {
+				var count = (i * 3 + j);
+				var x = 100 + 500 / 3 * (j + 0.5);
+				var y = 100 + 500 / 3 * (i + 0.5);
+				switch (count % 2) {
+				case 0:
+					App.walls.addRegularPolygon({center: {x: x, y: y}, radius: 25, count: count % 4 + 3});
+					break;
+				case 1:
+					App.walls.addStar({center: {x: x, y: y}, smallRadius: 15, bigRadius: 25, count: count % 4 + 5});
+					break;
+				}
+			}
+		}
+	};
+
 	App.createWalls.rooms = [
 		App.createWalls.TwoBoxes,
 		App.createWalls.FiveBoxes,
 		App.createWalls.Maze,
-		App.createWalls.MoreMaze,
+		App.createWalls.Shapes,
+		App.createWalls.MoreShapes,
 	];
 
 	App.createWalls.addOuterBox = function addOuterBox () {
