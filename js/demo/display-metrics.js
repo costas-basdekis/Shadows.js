@@ -5,7 +5,7 @@ var ShadowsApp = (function defineDispalyMetrics(obj, _) {
 
 	displayMetrics.init = function init() {
 		this.tableElement = document.getElementById('metrics').firstChild;
-		this.template = document.getElementById('metrics-row-template').innerText;
+		this.template = document.getElementById('metrics-row-template').textContent;
 		this.div = document.createElement('div');
 		var div = document.createElement('div');
 		this.textNode = document.createTextNode('');

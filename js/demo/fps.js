@@ -34,7 +34,7 @@ var FPSCounter = (function initFPSCounter() {
 		if (this.element) {
 			var element = document.getElementById(this.element) || null;
 			if (element) {
-				element.innerText = this.fps;
+				element.textContent = this.fps;
 			}
 		}
 
