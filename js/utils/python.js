@@ -199,6 +199,22 @@ function assert(condition, message) {
 	}
 }
 
+function assertFailed(message) {
+	throw "Assert failed: %s".interpolate(message);
+}
+
+function assertEqual(lhs, rhs, message) {
+	if (lhs !== rhs) {
+		throw "Assert failed: %s != %s - %s".interpolate(lhs, rhs, message);
+	}
+}
+
+function assertNotEqual(lhs, rhs, message) {
+	if (lhs === rhs) {
+		throw "Assert failed: %s == %s - %s".interpolate(lhs, rhs, message);
+	}
+}
+
 DefException = DEFEXCEPTION('DefException', PythonException);
 CallException = DEFEXCEPTION('CallException', PythonException);
 
