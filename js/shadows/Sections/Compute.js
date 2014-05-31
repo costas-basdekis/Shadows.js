@@ -113,15 +113,13 @@ var Shadows = (function defineSectionsCompute(obj) {
 		insertConflicts: DEF(
 			['self', {n: 'section', is: ['Shadows.PolarLine']}],
 			function insertConflicts(self, section) {
-				self.metrics.start(['ComputeStep.insertConflicts.getFirstInterSection']);
+				self.metrics.start(['ComputeStep.insertConflicts.getIntersectionsBoundaries']);
 				self.firstConflict = self.sections.getFirstInterSection([section]);
-				self.metrics.end(['ComputeStep.insertConflicts.getFirstInterSection']);
-				self.metrics.start(['ComputeStep.insertConflicts.getLastInterSection']);
 				self.lastConflict = self.sections.getLastInterSection({
 					section: section,
 					firstInterSection: self.firstConflict,
 				});
-				self.metrics.end(['ComputeStep.insertConflicts.getLastInterSection']);
+				self.metrics.end(['ComputeStep.insertConflicts.getIntersectionsBoundaries']);
 				self.logger.log(["Intersect %s-%s", self.firstConflict, self.lastConflict]);
 
 				self.metrics.start(['ComputeStep.insertConflicts.MakeSections']);
