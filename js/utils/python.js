@@ -104,11 +104,30 @@ String.prototype.interpolate = (function defineInterpolate() {
 	//@todo: Implement named interpolation
 	var re = /%[s%]/g;
 
-	function argToString(obj) {
+	function dictToString(obj, recursive) {
+		var string = "{";
+
+		var objKeys = keys(obj);
+
+		for (var i = 0, key ; key = objKeys[i] ; i++) {
+			if (i > 0) {
+				string += ",";
+			}
+			string += key + ": " + obj[key];
+		}
+
+		string += "}";
+
+		return string;
+	}
+
+	function argToStringNonRecursive(obj) {
 		if (obj === undefined) {
 			str = '<undefined>';
 		} else if (obj === null) {
 			str = '<null>';
+		} else if (isArray(obj)) {
+			str = "[" + obj.toString() + "]";
 		} else if (isFunction(obj.toString)) {
 			str = obj.toString();
 		} else {
@@ -119,6 +138,18 @@ String.prototype.interpolate = (function defineInterpolate() {
 			}
 
 			str = '[object ' + obj.prototype.name + ']';
+		}
+
+		return str;
+	}
+
+	function argToString(obj) {
+		var str;
+
+		if (isObject(obj) && !isinstance(obj, object) && !isArray(obj)) {
+			str = dictToString(obj);
+		} else {
+			str = argToStringNonRecursive(obj);
 		}
 
 		return str;
