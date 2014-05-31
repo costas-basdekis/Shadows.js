@@ -10,10 +10,15 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 
 	App.createShadows = function createShadows() {
 		this.paper.shadowsPath = new _.Path();
-		this.paper.background = new _.Raster(this.paper.backgroundUrl);
-		this.paper.background.scaling = new _.Point(.6, .6);
+		this.paper.background = new _.Raster({
+			source: this.paper.backgroundUrl,
+		});
 		this.paper.group = new _.Group(this.paper.shadowsPath, this.paper.background);
 		this.paper.group.clipped = true;
+		var width = 1500, height = 2000;
+		var scaling = 0.4;
+		this.paper.background.setPosition(width / 2 * scaling, height / 2 * scaling);
+		this.paper.background.scaling = new _.Point(scaling, scaling);
 	}
 
 	App.updateShadows = function updateShadows(shadows) {
