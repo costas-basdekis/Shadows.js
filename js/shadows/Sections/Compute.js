@@ -57,10 +57,20 @@ var Shadows = (function defineSectionsCompute(obj) {
 			}),
 		step: 
 			function step(self) {
+				self.logger.step();
 				self.logger.setIndent([1])
 
 				var section = self.newSections.sections[self.index];
-				self.insertSection([section]);
+				var success = False;
+				try {
+					self.insertSection([section]);
+					success = True;
+				} finally {
+					if (!success) {
+						self.logger.error(["Errored @%s", self.center]);
+						console.error("Errored @%s".interpolate(self.center));
+					}
+				}
 
 				self.index += 1;
 
