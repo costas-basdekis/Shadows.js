@@ -42,6 +42,10 @@ var Logger = CLASS('utils.Logger', {
 			}
 			self.log([">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"]);
 		},
+	step:
+		function step(self) {
+			self.log(["--------------------------------------------------------------------------------"]);
+		},
 	end:
 		function end(self) {
 			self.log(["<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"]);
@@ -59,16 +63,16 @@ var Logger = CLASS('utils.Logger', {
 
 			return str;
 		}),
-	warning: DEF(
+	warn: DEF(
 		['self', 'format', '*'],
-		function warning(self, format, args) {
+		function warn(self, format, args) {
 			if (self.muted) {
 				return '';
 			}
 			
 			var str = self.render([format, args]);
 
-			console.warning(str);
+			console.warn(str);
 
 			return str;
 		}),
