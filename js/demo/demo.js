@@ -24,6 +24,16 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		document.getElementById('presets').onclick = this.presets_onchange;
 		document.getElementById('setCenter').onclick = this.setCenter_onclick;
 		document.getElementById('recalculate').onclick = this.recalculate_onclick;
+		document.getElementById('myCanvas').onmousemove = this.canvas_onmousemove;
+	};
+
+	App.canvas_onmousemove = function canvas_onmousemove(e) {
+		var label = document.getElementById('mousePosition');
+
+		var rect = e.srcElement.getBoundingClientRect();
+
+		label.textContent = 'X: %s, Y: %s'.interpolate(
+			e.clientX - rect.left, e.clientY - rect.top);
 	};
 
 	App.muteLogger_onclick = function muteLogger_onclick() {
