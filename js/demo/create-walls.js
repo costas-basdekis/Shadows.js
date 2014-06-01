@@ -64,7 +64,6 @@ var ShadowsApp = (function defineShadowsApp(obj, _) {
 		App.walls.addLine({start: {x: 300, y: 350}, end: {x: 450, y: 500}})
 		App.walls.addLine({start: {x: 350, y: 300}, end: {x: 500, y: 450}})
 		App.walls.addLine({start: {x: 375, y: 425}, end: {x: 275, y: 525}})
-		App.walls.addLine({start: {x: 375, y: 425}, end: {x: 275, y: 525}})
 		// Buggy!
 		//App.walls.addPolygon([{x: 450, y: 200}, {x: 400, y: 300}, {x: 500, y: 300}]);
 	};
