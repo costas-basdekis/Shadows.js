@@ -250,8 +250,22 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 			[{n: 'commonSection', is: ['Shadows.PolarLine']}, 
 			 {n: 'compareSection', is: ['Shadows.PolarLine']}],
 			function visibility(commonSection, compareSection) {
-				var startIsVisible = Math.CILt([commonSection.start.distance, compareSection.start.distance]),
-					endIsVisible = Math.CILt([commonSection.end.distance, compareSection.end.distance]);
+				var startCompare = Math.compare([commonSection.start.distance, compareSection.start.distance]),
+					endCompare = Math.compare([commonSection.end.distance, compareSection.end.distance]);
+
+				//If an edge is equal, and the other is visible, then it's visible too
+				var startIsVisible = (
+					(startCompare == Math.Compare.LessThan) ||
+					(
+						(startCompare == Math.Compare.Equal) &&
+						(endCompare == Math.Compare.LessThan)
+					)),
+					endIsVisible = (
+					(endCompare == Math.Compare.LessThan) ||
+					(
+						(endCompare == Math.Compare.Equal) &&
+						(startCompare == Math.Compare.LessThan)
+					));
 
 				return {
 					startIsVisible: startIsVisible,
