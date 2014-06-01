@@ -19,10 +19,10 @@ var Shadows = (function defineMathPolar(obj, jsMath) {
 			function proper(angle){
 				var proper = angle;
 
-				while (proper > HALF_CIRCLE) {
+				while (Math.CIGt([proper, HALF_CIRCLE])) {
 					proper -= CIRCLE;
 				}
-				while (proper <= -HALF_CIRCLE) {
+				while (Math.CILEq([proper, -HALF_CIRCLE])) {
 					proper += CIRCLE;
 				}
 
@@ -33,10 +33,10 @@ var Shadows = (function defineMathPolar(obj, jsMath) {
 				var constricted = angle;
 				var end = start + CIRCLE;
 
-				while (constricted >= end) {
+				while (Math.CIGEq([constricted, end])) {
 					constricted -= CIRCLE;
 				}
-				while (constricted < start) {
+				while (Math.CILt([constricted, start])) {
 					constricted += CIRCLE;
 				}
 
