@@ -114,8 +114,7 @@ var Shadows = (function definePolarLine(obj, jsMath) {
 				return Math.CIEq([self.start.distance, 0]) ||
 					   Math.CIEq([self.end.distance, 0]) ||
 					   Math.CIEq([
-					   		Polar.angleDiff([self.start.distance,
-					   									 self.end.distance]),
+					   		Polar.angleDiff([self.start.angle, self.end.angle]),
 					   		Polar.HALF_CIRCLE,
 					   	]);
 			},
